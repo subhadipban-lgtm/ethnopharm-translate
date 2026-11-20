@@ -77,13 +77,17 @@ def segment_text(text: str, page: int | None = None) -> list[Segment]:
 
 
 def ingest_file(path: str) -> list[Segment]:
-    """Ingest a plain-text / markdown / html / pdf file into segments."""
+    """Ingest a plain-text / markdown / html / pdf / ocr-jsonl file into segments."""
     from pathlib import Path
 
     p = Path(path)
     suffix = p.suffix.lower()
     if suffix == ".pdf":
         return _ingest_pdf(p)
+    if suffix == ".jsonl":
+        from .ocr import segments_from_jsonl
+
+        return segments_from_jsonl(p)
     raw = p.read_text(encoding="utf-8", errors="replace")
     if suffix in (".html", ".htm"):
         raw = re.sub(r"<script.*?</script>", " ", raw, flags=re.S)
