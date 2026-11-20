@@ -294,15 +294,58 @@ Avoid zero-adoption community MT checkpoints for production. The prompt-level
 glossary constraint does the heavy lifting; the model needs to be good at
 following structured JSON instructions more than anything else.
 
+## Validating the program (`tmtrans eval`)
+
+Segment gates validate individual translations; **program validation** runs the
+whole pipeline against held-out reference pairs and scores it. Three routes:
+
+```bash
+# 1. Classical→modern stage, scored against a public parallel set
+#    (Gare/Classical_Chinese_to_Modern_Chinese, via the HF datasets-server API):
+tmtrans eval classical-zh --limit 100
+
+# 2. Any HF dataset with parallel fields — e.g. the en↔zh medical parallel set:
+tmtrans eval hf:jundai2003/medical-insights-en-zh \
+    --source-field narrative_zh --target-field narrative --lang zh --limit 50
+
+# 3. Your own gold set (JSONL with source/target keys, or CSV) — the recommended
+#    domain route: export human-approved segments, have an expert correct them,
+#    and reuse it as a recurring regression suite:
+tmtrans eval gold.jsonl --lang lzh --variant classical
+```
+
+Outputs: corpus **chrF++** and **BLEU** (zh tokenizer for Chinese), plus the
+program's safety statistics — validation-gate outcome distribution,
+**binomial-hallucination errors (G5 — must stay 0)**, reference-binomial recall
+(of the Latin binomials in the reference, how many survive in the output),
+length-ratio sanity, and a per-segment JSONL for error analysis
+(`outputs/eval-*.segments.jsonl`).
+
+Interpretation: chrF/BLEU measure fluency+adequacy against references; the
+safety metrics measure what actually ruins a traditional-medicine corpus.
+A run with high chrF but nonzero hallucination errors is a *failed* run.
+
+Notes:
+- Gated datasets (e.g. BhashaBench) work once you accept their terms on the
+  HF page and `export HF_TOKEN` — the loader authenticates automatically.
+- No `datasets` library needed; rows come from the datasets-server HTTP API
+  with pagination (`--limit`).
+
 ## Evaluation resources (verified)
 
-- `michaelwzhu/ShenNong_TCM_Dataset` — canonical TCM benchmark, includes
-  classical zh↔en tasks. Use to measure translation quality.
-- `bharatgenai/BhashaBench-Ayur` / `-Multi` — Ayurvedic knowledge evaluation,
-  English/Hindi and multi-language. Evaluation only, not training data.
+- `Gare/Classical_Chinese_to_Modern_Chinese` — public classical↔modern parallel
+  data; the `classical-zh` adapter validates the classical stage end-to-end.
+- `jundai2003/medical-insights-en-zh` — en↔zh parallel medical insights
+  (`narrative` / `narrative_zh`); medical-domain MT validation via the `hf:`
+  adapter.
+- `michaelwzhu/ShenNong_TCM_Dataset` — **correction:** its HF release is
+  `query`/`response` dialogue/instruction data, not a parallel translation
+  test set. Useful for domain QA-style evaluation of the underlying model,
+  not for scoring this pipeline's translations.
+- `bharatgenai/BhashaBench-Ayur` / `-Multi` — gated (auto-approval) MCQ/QA
+  benchmarks for Ayurvedic knowledge; evaluation of model knowledge, not MT.
 - `FreedomIntelligence/TCM-Pretrain-Data-ShizhenGPT` + `TCM-Instruction-Tuning-ShizhenGPT` —
   domain corpora if you later fine-tune.
-- Classical→modern Chinese datasets on HF for the classical stage.
 - ChiMed 2.0 (arXiv 2507.15275) is a pretraining/SFT/RLHF corpus that *includes*
   TCM classics — useful for domain adaptation, not a translation dataset.
 
@@ -330,6 +373,7 @@ src/tmtrans/
   service.py     background jobs, review→memory loop
   server.py      FastAPI app
   export.py      JSONL/JSON/CSV/XLSX/TXT with provenance
+  evaluation.py  program validation: HF/local reference sets, chrF/BLEU + safety metrics
   schemas/       translation-record JSON Schema
   web/static/    single-page workbench UI
 data/dictionary/ seed glossaries (TCM / Ayurveda / SE-Asian)
@@ -340,7 +384,7 @@ tests/           offline end-to-end suite (mock backend)
 
 ```bash
 export TMTRANS_BACKEND=mock
-pytest            # 33 offline tests (mock backends, no model needed)
+pytest            # 43 offline tests (mock backends, no model needed)
 ```
 
 ## License

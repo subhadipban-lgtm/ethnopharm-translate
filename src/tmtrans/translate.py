@@ -130,6 +130,11 @@ class Translator:
             attempts=attempts,
         )
 
+    def modernize(self, text: str, source_lang: str) -> str | None:
+        """Public classical→modern entry point (used by the evaluation harness)."""
+        modern_lang = "zh" if source_lang in ("zh", "lzh") else source_lang
+        return self._classical_stage(text, modern_lang)
+
     def _classical_stage(self, text: str, modern_lang: str) -> str | None:
         try:
             raw = self.backend.complete(build_classical_prompt(text, modern_lang))
