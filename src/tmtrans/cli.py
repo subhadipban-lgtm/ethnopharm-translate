@@ -113,6 +113,70 @@ def cmd_ocr(args) -> None:
     cmd_translate(args)
 
 
+def cmd_eval(args) -> None:
+    import json as _json
+
+    from .evaluation import (
+        compute_metrics,
+        evaluate_pairs,
+        format_report,
+        load_pairs_classical_zh,
+        load_pairs_hf,
+        load_pairs_local,
+    )
+
+    target = args.target
+    if target == "classical-zh":
+        pairs = load_pairs_classical_zh(args.limit)
+        lang, classical_mode = "lzh", True
+        title = "Gare/Classical_Chinese_to_Modern_Chinese (classical→modern stage)"
+    elif target.startswith("hf:"):
+        dataset = target[3:]
+        if not args.source_field or not args.target_field:
+            raise SystemExit("hf: datasets need --source-field and --target-field")
+        pairs = load_pairs_hf(
+            dataset, args.config, args.split, args.source_field, args.target_field, args.limit
+        )
+        lang, classical_mode = args.lang, False
+        title = f"{dataset} [{args.config}/{args.split}] {args.source_field}→{args.target_field}"
+    else:
+        pairs = load_pairs_local(target)
+        if not args.lang:
+            raise SystemExit("local gold sets need --lang")
+        lang, classical_mode = args.lang, args.classical
+        title = f"local gold set {target}"
+
+    glossary = _glossary(args.dictionary)
+    from .rag import TranslationMemoryIndex
+    from .translate import Translator
+
+    translator = Translator(backend=get_backend(), glossary=glossary, memory=TranslationMemoryIndex())
+    print(f"Evaluating {len(pairs)} pairs ({title})…")
+    results = evaluate_pairs(
+        pairs, translator, lang, variant=args.variant, classical_mode=classical_mode,
+        progress=lambda i, n: print(f"  [{i}/{n}]", end="\r") or None,
+    )
+    print()
+    metrics = compute_metrics(results, lang)
+    report = format_report(metrics, title)
+    print(report)
+    out = Path(args.out) if args.out else Path("outputs") / f"eval-{int(time.time())}.json"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(
+        _json.dumps({"title": title, "metrics": metrics, "report": report}, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
+    per_segment = [
+        {"source": r.source, "reference": r.reference, "hypothesis": r.hypothesis,
+         "status": r.status, "gates": r.gate_failures}
+        for r in results
+    ]
+    (out.with_suffix(".segments.jsonl")).write_text(
+        "\n".join(_json.dumps(s, ensure_ascii=False) for s in per_segment), encoding="utf-8"
+    )
+    print(f"\nSaved {out} (+ per-segment {out.with_suffix('.segments.jsonl')})")
+
+
 def cmd_export(args) -> None:
     store = Store(args.db)
     out = Path(args.out or f"outputs/{args.doc_id}.{args.fmt}")
@@ -202,6 +266,21 @@ def build_parser() -> argparse.ArgumentParser:
     e.add_argument("--approved-only", action="store_true")
     e.add_argument("--out", default=None)
     e.set_defaults(func=cmd_export)
+
+    v = sub.add_parser("eval", help="validate the program against a reference dataset")
+    v.add_argument("target",
+                   help="'classical-zh' | 'hf:<org>/<name>' | path to local gold JSONL/CSV")
+    v.add_argument("--lang", default=None, help="source language (required for local / hf:)")
+    v.add_argument("--variant", default=None, choices=["classical", "modern"])
+    v.add_argument("--classical", action="store_true",
+                   help="local set: evaluate only the classical→modern stage")
+    v.add_argument("--config", default="default")
+    v.add_argument("--split", default="train")
+    v.add_argument("--source-field", default=None)
+    v.add_argument("--target-field", default=None)
+    v.add_argument("--limit", type=int, default=100)
+    v.add_argument("--out", default=None)
+    v.set_defaults(func=cmd_eval)
 
     g = sub.add_parser("glossary", help="manage the bilingual dictionary")
     g.add_argument("action", choices=["import", "stats", "export"])
