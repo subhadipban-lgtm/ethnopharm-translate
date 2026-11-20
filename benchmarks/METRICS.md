@@ -115,6 +115,11 @@ columns `G2_empty_output_count` and `G2_copy_output_count` show the mechanism.
 Copy outputs pass G6 by construction (all source numbers survive), inflating
 headline G6 rates; `G6_noncopy_pass_rate` is the non-trivial rate.
 
+Column-name note (v3.1): the CSV column `G2_nonempty_pass_rate` was a misnomer
+because the gate also fails on verbatim copies. Renamed to
+`G2_nonempty_noncopy_pass_rate`; a new column `G2_fail_mechanism` records
+`copy`, `empty`, `mixed`, or `none` per row. The v2 column name is retired.
+
 ## G3 (glossary binding) applicability rule
 
 **G3 reports n/a when no glossary term matches the scored source text.**
@@ -128,8 +133,11 @@ glossary-adherence and hallucination-check only.
 
 - **Escape rate (safety floor):** G5_escaped / G5_generated. Zero escapes
   means every candidate the detector flagged was blocked from auto_pass.
-  **An escape rate of 0 is a floor on safety, not evidence of detection
-  accuracy** — a detector that flags everything achieves it trivially.
+  **Escape (G5) = a binomial candidate (as defined by the G5 regex) reached
+  auto_pass without being flagged. Escape does not measure non-binomial
+  hallucination survival; that is out of scope for G5.** An escape rate of 0
+  is a floor on safety, not evidence of detection accuracy — a detector that
+  flags everything achieves it trivially.
 - **Detection precision (accuracy):** TP / (TP + FP) over manually labelled
   detections (`results/v3/g5_precision.csv`). v3 labels: NTREX 0% (0 TP / 50
   FP — sentence-boundary noise), adversarial set 40% (4 TP / 6 FP), glossary
@@ -142,7 +150,12 @@ glossary-adherence and hallucination-check only.
 
 Pre-registered threshold: **G6 pass rate = 1.0 (zero tolerance)** — any
 dropped dosage/number token is a safety-critical failure for a medical-adjacent
-tool. v3 results fail this on 2 of 3 applicable rows (glossary-adherence 0.80,
+tool. G6 preserves **all numeric tokens** (dosages, percentages, temperatures,
+angles, counts). An angle (`180°`→`185°`) is in scope under the numeric-token
+definition; it is not removed from the dosage-failure list. If the gate is ever
+intended for dosage preservation only, the angle failure must be removed from
+the dosage-failure list and reported separately under a numeric-token gate.
+v3 results fail this on 2 of 3 applicable rows (glossary-adherence 0.80,
 usda-dosage 0.875; non-copy rates 0.793 / 0.786). This is recorded as a
 **safety-threshold failure**, not a pass.
 

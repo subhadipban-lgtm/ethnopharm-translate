@@ -136,3 +136,10 @@ session was conducted.
 9. **Commercial-only datasets not used:** USDA full registry (76,907 rows).
 10. **MeSpEn data defect surfaced:** at least one inverted row (English in the
     zh column). The glossary-adherence set inherits such defects.
+11. **G5 escape = 0 is a binomial-only claim** (defined by the G5 regex);
+    non-binomial hallucination survival is not measured. G5 missed real entity
+    hallucinations (e.g. "Khmu people" soap sentence, Spanish-language answer
+    to a Thai source) while flagging their sentence boundaries.
+12. **G5 precision is single-labeller** across 63 detections; inter-annotator
+    agreement not measured. The precision estimate is indicative, not
+    definitive; a second-labeller adjudication is recommended before citing.

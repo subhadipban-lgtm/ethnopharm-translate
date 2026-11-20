@@ -163,6 +163,27 @@ Worse: 2 of the 3 glossary-adherence flags were **correct** renderings
 (`10-Hydroxydecylenic acid`, `Hydroxydecenoic acid` — exact glossary
 reference strings). The gate blocks right answers on chemical nomenclature.
 
+### Adversarial-set FP composition (Part J)
+
+Of the 6 adversarial FPs (hallucination-check set): all 6 are boundary flags
+on non-hallucination content — none are wrong-span flags on designed
+hallucination segments, none are flags on undesigned hallucinations.
+
+| segment_id | detected span | fp_class |
+|---|---|---|
+| hallucination-check:1 | Danshen two | boundary (vernacular name + quantity word) |
+| hallucination-check:4 | Sweet wormwood | boundary (correct vernacular translation) |
+| hallucination-check:6 | Coptis rhizome | boundary (correct genus + common noun) |
+| hallucination-check:6 | Three grams | boundary (quantity phrase) |
+| hallucination-check:7 | Some herbal | boundary (sentence-initial phrase) |
+| hallucination-check:8 | Please provide | boundary (sentence-initial phrase) |
+
+Recall 4/4 refers to the **designed binomials only** (Curcuma fabricata,
+Herba fictitia, Glycyrrhiza imaginaria, Panax fictionalis). In none of the 6
+FP cases was the segment blocked *because of* a designed hallucination while
+G5 flagged a different span — each FP is an independent boundary match on
+non-hallucination content.
+
 ## 10. G2 failures (empty and copy outputs)
 
 The v3 audit premise said "20 of 48 usda-dosage outputs are empty." The
@@ -180,23 +201,27 @@ program's G2 gate counts both; the mechanism is copy, not empty:
 - Copy (glossary-adherence idx=18): `13-顺-维甲酸` → `Ro acutane` matched its
   source-side glossary constraint verbatim (the source column contained Latin).
 
-## 11. G6 dosage/number failures (real examples)
+## 11. G6 dosage/number failures (real examples) — per-dataset composition
 
-Genuine value corruption (safety-critical):
-- usda idx=0: src `EC100=50 uM` → hyp `EC150 dosage = 50 uM` — the potency
-  label **changed value** (100→150). Silent dosage corruption.
+Per-dataset breakdown (from `benchmarks/results/v2/*_mlx-community_Qwen2.5-3B-Instruct-4bit.jsonl`):
+
+| dataset | G6 failures | genuine value corruption | encoding shift | reference omission |
+|---|---|---|---|---|
+| glossary-adherence | 6 | 1 | 4 | 1 |
+| usda-dosage | 6 | 4 | 2 | 0 |
+
+Genuine value corruption (safety-critical) — attributed to dataset/segment:
+- usda idx=0: src `EC100=50 uM` → hyp `EC150 dosage = 50 uM` — potency label changed value (100→150). Silent dosage corruption.
 - usda idx=29: src `IC100=2 mM` → hyp `IC150=2 mM` — same corruption pattern.
-- glossary idx=29: src `180° plane rotation pulse` → hyp `185度…` — 180→185.
+- usda idx=31: src `IC100=2 mM` → hyp `IC150=2 mM` — same corruption pattern.
+- usda idx=40: src `IC100=2.5 mM` → hyp `IC150=2.5 mM` — same corruption pattern.
+- glossary idx=29: src `180° plane rotation pulse` → hyp `185度平面旋转脉冲` — 180→185 angle corruption (in scope under G6's numeric-token definition; see METRICS.md).
 
-Gate false positives / encoding shifts (number semantically kept or absent in
-the reference too):
-- glossary idx=18: `13-顺-维甲酸` → `Ro acutane` drops "13", but the gold
-  reference is also `Ro acutane` — the reference itself omits the locant.
-- glossary idx=1: `10-羟基-Δ2-葵烯酸` → `10-Hydroxydecylenic acid` — the Δ2
-  locant is encoded inside the chemical name; gate flags "2" missing.
-- usda idx=15: `750 mg/4x/day` → `750 mg taken four times` — numeric 4x
-  rendered as a word.
+That is 5 genuine instances across both datasets (3 distinct corruption *types*: EC100→EC150, IC100→IC150, 180°→185°). Note: ERROR_ANALYSIS v2's "three genuine value corruptions" referred to 3 distinct types represented by examples; the per-instance count is 5 (1 glossary-adherence + 4 usda-dosage).
 
-Data-quality note: glossary idx=29 is an **inverted MeSpEn row** (English in
-the source column, Chinese reference) — a dataset defect that surfaced only
-because G6 flagged it.
+Gate false positives / encoding shifts (number semantically kept or absent in the reference too):
+- glossary-adherence (4): idx=1 missing `2` (Δ2 locant inside chemical name); idx=5 missing `1, 10`; idx=12 missing `12`; idx=27 missing `17` — locants dropped under glossary pressure, gate catches them reliably.
+- glossary-adherence (1 reference omission): idx=18 `13-顺-维甲酸` → `Ro acutane` drops "13", but the gold reference is also `Ro acutane` — the reference itself omits the locant.
+- usda-dosage (2): idx=15 `750 mg/4x/day` → `750 mg taken four times`; idx=41 `750 mg/4x/day` → `750 mg taken four times per person` — numeric `4x` rendered as a word.
+
+Data-quality note: glossary idx=29 is an **inverted MeSpEn row** (English in the source column, Chinese reference) — a dataset defect that surfaced only because G6 flagged it.

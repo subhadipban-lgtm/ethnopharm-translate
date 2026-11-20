@@ -11,18 +11,23 @@ requires remediation.
 
 ## Justification (numbers)
 
-The safety floor held: G5_escaped = 0/63 across all rows including the
-adversarial set (10 generated, 10 caught). But v3 surface corrections change
-the risk picture: G2 fails 42% of usda-dosage rows (20/48 verbatim copies,
-1/3 classical-zh true empty), G6 fails the pre-registered zero-tolerance
-threshold on 2 of 3 applicable rows (glossary-adherence 0.80, usda-dosage
-0.875; non-copy rates 0.793/0.786), and three of the G6 failures are genuine
-dosage-value corruptions (EC100→EC150, IC100→IC150, 180°→185°). G5 detection
-precision is 0% on news text (0 TP / 50 FP) and 40% on the adversarial set —
-escape=0 is a floor, not evidence of accuracy. chrF≥40 fails on 7/10 rows
-(6/8 quality rows) at 3B. RAG glossary retrieval is the dominant quality
-factor where an applicable glossary exists (81.66→38.16 off); no measurable
-effect where none applies.
+G5 escape rate was 0/63, but at 0% precision on news text the gate operates
+as a blanket block rather than a detector: it blocked 2 correct chemical
+renderings and missed the 2 real entity hallucinations it was not designed to
+see. v3 surface corrections change the risk picture: G2 fails 42% of
+usda-dosage rows (20/48 verbatim copies, 1/3 classical-zh true empty), G6
+fails the pre-registered zero-tolerance threshold on 2 of 3 applicable rows
+(glossary-adherence 0.80, usda-dosage 0.875; non-copy rates 0.793/0.786),
+and three of the G6 failures are genuine dosage-value corruptions
+(EC100→EC150, IC100→IC150, 180°→185°). G5 detection precision is 0% on news
+text (0 TP / 50 FP) and 40% on the adversarial set — escape=0 is a floor, not
+evidence of accuracy. chrF≥40 fails on 7/10 rows (6/8 quality rows) at 3B.
+RAG glossary retrieval is the dominant quality factor where an applicable
+glossary exists (81.66→38.16 off); no measurable effect where none applies.
+
+Reproducibility: hypothesis strings are **byte-identical** across run1, run2,
+and the v2 baseline (verified by per-segment diff: glossary-adherence 30/30,
+usda-dosage 48/48), chrF delta 0.00 at n=30 and n=48.
 
 ## Conditions
 
@@ -64,6 +69,20 @@ effect where none applies.
 - G5 entity-level hallucination detection: not attempted (the guardrail missed
   real entity hallucinations it was not designed to see).
 - MeSpEn inverted-row defects: the glossary-adherence set inherits them.
+- **G5 precision (0% NTREX / 40% adversarial) is from a single labeller across
+  63 detections. Inter-annotator agreement not measured. The precision estimate
+  is one analyst's judgment and should be treated as indicative rather than
+  definitive; a second-labeller adjudication of at least 20 detections is
+  recommended before the precision number is cited in any publication.**
+
+### P0-evidence vs P0-deployment
+
+`benchmarks/reproduce_v3.sh` enforces **evidence-level P0**: model-level
+G6 != 1.0 or G2 empty/copy rate > 0.05 → exit 1. It cannot see a fail-closed
+mitigation, so if the mitigation were added tomorrow the script would still
+exit 1. **Deployment-level P0** (RECOMMENDATION.md) requires the fail-closed
+behavior (reject any segment with a missing/altered numeric token; fail closed
+on empty output) — verifying it is out of scope for the script.
 
 **Bottom line:** the escape-rate safety property is supported; two
 safety-threshold failures (G2, G6) block deployment on dosage-bearing text.
