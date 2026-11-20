@@ -1,6 +1,6 @@
 # Validation Report v2 — ethnopharm-translate (tmtrans)
 
-Branch: `validation/v2` · Date: 2026-11-21 · Pre-registered thresholds: `benchmarks/METRICS.md`
+Branch: `validation/v2` · Validation commit: `08d529b6fd4cc0c3f086f1fef00f2fe3f9f75341` (on top of main `8a39fcc`) · Date: 2026-11-21 · Pre-registered thresholds: `benchmarks/METRICS.md`
 
 ## 1. Executive summary
 
