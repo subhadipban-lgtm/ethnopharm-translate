@@ -8,7 +8,7 @@ Two safety-threshold failures block deployment on dosage-bearing text: **G2** (e
 
 ## 2. Environment
 
-Unchanged from v2: `mlx-community/Qwen2.5-3B-Instruct-4bit` (4-bit MLX), endpoint `http://localhost:8099/v1` (mlx-lm 0.32.2), temperature 0, seed 42, Python 3.15.2, macOS arm64. Offline tests: **42** (`pytest -q`: `42 passed in 0.53s`). v2 commit `08d529b6fd4cc0c3f086f1fef00f2fe3f9f75341`; v3 adds correction-layer commits on `validation/v3` (SHA recorded in Part 11).
+Unchanged from v2: `mlx-community/Qwen2.5-3B-Instruct-4bit` (4-bit MLX), endpoint `http://localhost:8099/v1` (mlx-lm 0.32.2), temperature 0, seed 42, Python 3.15.2, macOS arm64. Offline tests: **42** (`pytest -q`: `42 passed in 0.53s`). v2 commit `08d529b6fd4cc0c3f086f1fef00f2fe3f9f75341`; v3 correction commit: `dfcc615` (branch `validation/v3`, pushed to origin).
 
 ## 3. Part A — segment-count reconciliation
 
