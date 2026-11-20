@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tmtrans"
+version = "0.1.0"
+description = "Validated translation of traditional medicine literature (TCM, Ayurveda, SE-Asian) with RAG, glossary-constrained decoding and human review."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.29",
+    "httpx>=0.27",
+    "pydantic>=2.6",
+    "pydantic-settings>=2.2",
+    "python-multipart>=0.0.9",
+    "openpyxl>=3.1",
+    "PyYAML>=6.0",
+    "rapidfuzz>=3.6",
+    "langcodes>=3.4",
+    "jsonschema>=4.21",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+pdf = ["pymupdf>=1.24"]
+
+[project.scripts]
+tmtrans = "tmtrans.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+tmtrans = ["web/static/*", "schemas/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

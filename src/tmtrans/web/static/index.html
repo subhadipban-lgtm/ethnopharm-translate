@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tmtrans — traditional medicine translation workbench</title>
+<style>
+  :root { --bg:#0f1419; --panel:#1a222b; --line:#2c3a47; --text:#e6edf3; --dim:#8b9aa8;
+          --accent:#4da3ff; --green:#3fb950; --amber:#d29922; --red:#f85149; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.5 -apple-system,"Segoe UI",Helvetica,Arial,sans-serif;
+         background:var(--bg); color:var(--text); }
+  header { padding:14px 22px; border-bottom:1px solid var(--line); display:flex;
+           align-items:baseline; gap:14px; }
+  header h1 { font-size:17px; margin:0; }
+  header .meta { color:var(--dim); font-size:12px; }
+  nav { display:flex; gap:4px; padding:10px 22px; border-bottom:1px solid var(--line); }
+  nav button { background:none; border:1px solid transparent; color:var(--dim);
+               padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px; }
+  nav button.active { background:var(--panel); color:var(--text); border-color:var(--line); }
+  main { padding:20px 22px; max-width:1500px; margin:0 auto; }
+  .view { display:none; } .view.active { display:block; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:8px;
+          padding:16px; margin-bottom:16px; }
+  label { display:block; color:var(--dim); font-size:12px; margin:10px 0 4px; }
+  input,select,textarea { width:100%; background:#0d1217; border:1px solid var(--line);
+        color:var(--text); border-radius:6px; padding:7px 10px; font:inherit; }
+  textarea { min-height:140px; font-family:inherit; }
+  .row { display:flex; gap:12px; } .row > * { flex:1; }
+  button.primary { background:var(--accent); color:#04121f; border:none; border-radius:6px;
+        padding:8px 18px; font-weight:600; cursor:pointer; margin-top:12px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; }
+  th,td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); }
+  th { color:var(--dim); font-weight:500; }
+  tr.clickable { cursor:pointer; } tr.clickable:hover { background:#212b36; }
+  .badge { display:inline-block; padding:1px 8px; border-radius:10px; font-size:11px; }
+  .b-auto_pass { background:#12351c; color:var(--green); }
+  .b-approved { background:#12351c; color:var(--green); }
+  .b-needs_review { background:#3a2f10; color:var(--amber); }
+  .b-failed { background:#3d1414; color:var(--red); }
+  .b-running,.b-pending { background:#16283a; color:var(--accent); }
+  .b-completed { background:#12351c; color:var(--green); }
+  .b-error { background:#3d1414; color:var(--red); }
+  .seg { border:1px solid var(--line); border-radius:8px; margin-bottom:12px;
+         background:var(--panel); }
+  .seg-head { padding:8px 14px; display:flex; gap:10px; align-items:center;
+              border-bottom:1px solid var(--line); }
+  .seg-body { display:grid; grid-template-columns:1fr 1fr; gap:0; }
+  .seg-src,.seg-tgt { padding:12px 14px; white-space:pre-wrap; }
+  .seg-src { border-right:1px solid var(--line); color:#c8d3dc; }
+  .seg-tgt textarea { min-height:90px; }
+  .gates { padding:6px 14px 10px; font-size:12px; color:var(--dim); }
+  .gate-fail { color:var(--amber); }
+  .seg-actions { padding:0 14px 12px; display:flex; gap:8px; }
+  .seg-actions button { border:1px solid var(--line); background:#0d1217; color:var(--text);
+        border-radius:6px; padding:5px 14px; cursor:pointer; }
+  .seg-actions .approve { border-color:var(--green); color:var(--green); }
+  .muted { color:var(--dim); } .small { font-size:12px; }
+  #toast { position:fixed; bottom:20px; right:20px; background:var(--accent); color:#04121f;
+           padding:10px 18px; border-radius:8px; font-weight:600; display:none; }
+  .filterbar { display:flex; gap:10px; align-items:center; margin-bottom:14px; }
+  .filterbar select { width:auto; }
+  .pill { background:#0d1217; border:1px solid var(--line); border-radius:6px;
+          padding:2px 8px; font-size:11px; margin-right:4px; display:inline-block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>tmtrans</h1>
+  <span class="meta" id="backend-meta">traditional medicine translation workbench</span>
+</header>
+<nav>
+  <button data-view="documents" class="active">Documents</button>
+  <button data-view="new">New translation</button>
+  <button data-view="review">Review queue</button>
+  <button data-view="glossary">Glossary</button>
+  <button data-view="candidates">Term candidates</button>
+</nav>
+<main>
+  <section id="view-documents" class="view active">
+    <div class="card">
+      <table id="doc-table">
+        <thead><tr><th>Title</th><th>Lang</th><th>Status</th><th>Progress</th>
+        <th>auto-pass</th><th>review</th><th>approved</th><th>failed</th><th>Export</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="doc-detail"></div>
+  </section>
+
+  <section id="view-new" class="view">
+    <div class="card">
+      <h3>Translate pasted text</h3>
+      <label>Title</label><input id="nt-title" placeholder="e.g. Shanghan Lun ch. 12 excerpt">
+      <div class="row">
+        <div><label>Source language</label>
+          <select id="nt-lang">
+            <option value="zh">Chinese (modern)</option><option value="lzh">Classical Chinese</option>
+            <option value="sa">Sanskrit</option><option value="pi">Pali</option>
+            <option value="hi">Hindi</option><option value="ta">Tamil</option>
+            <option value="th">Thai</option><option value="km">Khmer</option>
+            <option value="lo">Lao</option><option value="my">Burmese</option>
+            <option value="vi">Vietnamese</option><option value="id">Indonesian</option>
+            <option value="ms">Malay</option><option value="tl">Tagalog</option>
+          </select></div>
+        <div><label>Variant</label>
+          <select id="nt-variant"><option value="">auto</option>
+            <option value="classical">classical (insert modern-rewrite stage)</option>
+            <option value="modern">modern (direct)</option></select></div>
+        <div><label>Tradition</label>
+          <select id="nt-tradition"><option value="">—</option><option>tcm</option>
+            <option>ayurveda</option><option>se-asian</option><option>unani</option></select></div>
+      </div>
+      <label>Source text</label>
+      <textarea id="nt-text" placeholder="Paste traditional medicine source text here…"></textarea>
+      <button class="primary" id="nt-submit">Translate</button>
+    </div>
+    <div class="card">
+      <h3>… or upload a file (.txt / .md / .html / .pdf)</h3>
+      <input type="file" id="nf-file">
+      <div class="row">
+        <div><label>Source language</label><input id="nf-lang" value="zh"></div>
+        <div><label>Variant</label><input id="nf-variant" placeholder="auto"></div>
+      </div>
+      <button class="primary" id="nf-submit">Upload &amp; translate</button>
+    </div>
+  </section>
+
+  <section id="view-review" class="view">
+    <div class="filterbar">
+      <span class="muted">Document</span><select id="rq-doc"></select>
+      <span class="muted">Status</span>
+      <select id="rq-status"><option value="needs_review">needs review</option>
+        <option value="failed">failed</option><option value="auto_pass">auto-pass</option>
+        <option value="approved">approved</option><option value="">all</option></select>
+      <button class="primary" style="margin:0" id="rq-load">Load</button>
+    </div>
+    <div id="rq-list"></div>
+  </section>
+
+  <section id="view-glossary" class="view">
+    <div class="card">
+      <h3>Glossary <span class="muted small" id="gl-stats"></span></h3>
+      <div class="row"><input id="gl-q" placeholder="Search a term (Hanzi, IAST, English)…">
+        <button class="primary" style="margin:0;flex:0 0 100px" id="gl-search">Search</button></div>
+      <div id="gl-results" style="margin-top:12px"></div>
+      <p class="small muted">Add entries via <code>data/dictionary/*.csv</code> or the API
+        (<code>POST /api/glossary</code>). The seed glossary covers TCM, Ayurveda and
+        SE-Asian materia medica; extend it with your own validated terms.</p>
+    </div>
+  </section>
+
+  <section id="view-candidates" class="view">
+    <div class="card"><h3>Unmatched terms (dictionary growth queue)</h3>
+      <p class="small muted">Terms the model encountered but could not resolve against the
+      glossary. Resolve these into curated dictionary entries — never accept a model-invented
+      binomial.</p>
+      <table id="tc-table"><thead><tr><th>Source form</th><th>Lang</th><th>Occurrences</th></tr></thead>
+      <tbody></tbody></table>
+    </div>
+  </section>
+</main>
+<div id="toast"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>

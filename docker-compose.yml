@@ -1,0 +1,16 @@
+services:
+  tmtrans:
+    build: .
+    ports:
+      - "8765:8765"
+    environment:
+      # Point at your model server. On the host: use host.docker.internal.
+      TMTRANS_BACKEND: openai_compat
+      TMTRANS_BASE_URL: http://host.docker.internal:11434/v1   # Ollama
+      # TMTRANS_BASE_URL: http://host.docker.internal:8000/v1  # vLLM
+      TMTRANS_MODEL: qwen2.5:7b-instruct
+    volumes:
+      - ./data:/app/data
+      - ./outputs:/app/outputs
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
