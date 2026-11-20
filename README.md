@@ -1,0 +1,207 @@
+# tmtrans — validated traditional-medicine translation workbench
+
+Local-server program for translating traditional medicine literature (TCM,
+Ayurveda, and Southeast Asian ethnopharmacology) into English with **proper
+validation and a RAG strategy** — not generic machine translation.
+
+Built as a standalone workstream of the ethnopharm-ai / NP-Alpha project, in its
+own repository, so corpus translation can proceed independently of the
+discovery pipeline.
+
+## Why not generic MT
+
+Traditional medicine texts defeat generic MT: classical phrasing (文言文,
+classical Sanskrit), formula names, materia medica synonyms, and concepts with
+no biomedical equivalent (qi, dosha, 归经). The failure mode that matters most
+is **hallucinated binomials** — a model inventing a plausible Latin species name
+for a herb it cannot identify. tmtrans is built around preventing exactly that.
+
+## How it works
+
+```
+source text / file
+      │
+      ▼
+segmentation (CJK 。！？, Indic danda ।॥, Thai/Khmer/Lao aware)
+      │
+      ▼
+[optional] classical → modern stage   (文言文 → modern Chinese, etc.)
+      │
+      ▼
+RAG retrieval
+  ├─ glossary hits  → injected as BINDING prompt constraints
+  └─ translation memory (TF-IDF char-ngram index over human-approved pairs)
+      │
+      ▼
+LLM translation   (any OpenAI-compatible endpoint: vLLM / Ollama / LM Studio)
+      │
+      ▼
+deterministic validation gates
+  G2 non-empty / not a copy of source
+  G3 every glossary rendering appears verbatim in the output
+  G4 residual source-script detection (untranslated spans)
+  G5 binomial hallucination check against glossary + accepted-species registry
+  G6 numbers / dosages preserved
+  G7 length-ratio plausibility
+      │
+      ▼
+human review queue (bilingual editor in the web UI)
+      │
+      ├─ approved pairs feed the translation memory (RAG improves over time)
+      └─ unmatched terms → dictionary-growth queue
+      │
+      ▼
+exports: JSONL / JSON / CSV / XLSX / TXT with full validation + review provenance
+```
+
+The central rule: **a binomial is only ever emitted if it is attested in the
+glossary or the accepted-species registry.** Unmatched herbs keep their source
+name and enter a curation queue. Nothing is silently guessed.
+
+## Quick start (local server)
+
+Requires Python 3.10+.
+
+```bash
+git clone <this-repo> && cd ethnopharm-translate
+python3 -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+pip install -e .
+
+# Point at your model server — Ollama by default:
+export TMTRANS_BASE_URL=http://localhost:11434/v1
+export TMTRANS_MODEL=qwen2.5:7b-instruct
+
+# Or vLLM:
+# export TMTRANS_BASE_URL=http://localhost:8000/v1
+# export TMTRANS_MODEL=Qwen/Qwen2.5-7B-Instruct
+
+tmtrans doctor          # checks endpoint + glossary
+tmtrans serve           # web workbench on http://127.0.0.1:8765
+```
+
+Open **http://127.0.0.1:8765**: paste text or upload a file, watch validation
+gates run per segment, review in the bilingual editor, approve, export.
+
+### No GPU? Dry-run mode
+
+```bash
+export TMTRANS_BACKEND=mock
+tmtrans serve
+```
+
+The mock backend echoes the source with glossary substitutions so you can
+exercise the full pipeline, validation gates, review queue and exports without
+any model. This is also how the test suite runs.
+
+### Docker
+
+```bash
+docker compose up --build
+# workbench on http://localhost:8765; edit docker-compose.yml for vLLM vs Ollama
+```
+
+## CLI
+
+```bash
+tmtrans translate chapter.txt --lang lzh --variant classical --out outputs/
+tmtrans export <doc_id> --fmt jsonl --approved-only
+tmtrans export <doc_id> --fmt xlsx            # colour-coded review sheet
+tmtrans glossary import my_terms.csv          # append to data/dictionary/custom.csv
+tmtrans glossary stats
+```
+
+`--lang` accepts: `zh` (modern Chinese), `lzh` (classical Chinese), `sa`
+(Sanskrit), `pi` (Pali), `hi`, `ta`, `th`, `km`, `lo`, `my`, `vi`, `id`, `ms`,
+`tl`. Classical variants insert a classical→modern rewrite stage before
+English translation.
+
+## The dictionary is the backbone
+
+`data/dictionary/*.csv` — seed glossaries for TCM (~50 entries), Ayurveda
+(~50), and SE-Asian traditions (~35), each with source form, variants, English
+rendering, accepted binomial, family, tradition, and pharmacopoeia reference.
+Columns:
+
+```
+entry_id, category, source_lang, source_form, variants(|), english,
+binomial, inchikey, family, tradition, pharmacopoeia, notes
+```
+
+- Add your own curated entries to `data/dictionary/custom.csv` (or via
+  `POST /api/glossary` / `tmtrans glossary import`). They take effect immediately.
+- Unmatched terms encountered during translation accumulate in
+  **Term candidates** in the UI — resolve them into curated entries rather than
+  accepting model output.
+- **NP-Alpha linkage:** export the accepted binomials from the Gate-A LOTUS
+  registry (one per line) and point `paths.registry` at it in
+  `config/default.yaml`. The hallucination gate then accepts registry-attested
+  binomials, keeping translation consistent with the discovery chain's
+  InChIKey-keyed universe. The `inchikey` column is reserved for this linkage.
+
+## Recommended models (verified against HF, Nov 2026)
+
+| Purpose | Recommendation |
+|---|---|
+| General zh/sa→en with RAG | Qwen2.5-7B-Instruct (or larger) via vLLM/Ollama |
+| TCM-specialised decoding | FreedomIntelligence/ShizhenGPT-7B-LLM |
+| Classical Chinese encoding | gujiBERT (for encoding/NER tasks, not generation) |
+| Budget SFT baseline | fine-tuned NLLB-200-distilled-600M |
+
+Avoid zero-adoption community MT checkpoints for production. The prompt-level
+glossary constraint does the heavy lifting; the model needs to be good at
+following structured JSON instructions more than anything else.
+
+## Evaluation resources (verified)
+
+- `michaelwzhu/ShenNong_TCM_Dataset` — canonical TCM benchmark, includes
+  classical zh↔en tasks. Use to measure translation quality.
+- `bharatgenai/BhashaBench-Ayur` / `-Multi` — Ayurvedic knowledge evaluation,
+  English/Hindi and multi-language. Evaluation only, not training data.
+- `FreedomIntelligence/TCM-Pretrain-Data-ShizhenGPT` + `TCM-Instruction-Tuning-ShizhenGPT` —
+  domain corpora if you later fine-tune.
+- Classical→modern Chinese datasets on HF for the classical stage.
+- ChiMed 2.0 (arXiv 2507.15275) is a pretraining/SFT/RLHF corpus that *includes*
+  TCM classics — useful for domain adaptation, not a translation dataset.
+
+## Validation philosophy
+
+Gates are **deterministic**, not LLM-judged, so validation is reproducible.
+`auto_pass` means "no gate fired", not "correct" — human review is the
+acceptance step, and only human-approved pairs enter the RAG memory. This
+keeps the retrieval loop from amplifying its own errors.
+
+## Layout
+
+```
+src/tmtrans/
+  segment.py     segmentation with CJK/Indic awareness + PDF/HTML/TXT ingestion
+  lang.py        language profiles, classical-stage decisions, IAST folding
+  dictionary.py  bilingual terminology store (herbs/formulas/diseases/concepts)
+  rag.py         TF-IDF char-ngram translation memory + glossary retrieval
+  prompts.py     binding-glossary prompt construction, tolerant JSON parsing
+  backend.py     OpenAI-compatible client (vLLM/Ollama/...) + mock backend
+  translate.py   orchestration, self-repair retries, classical stage
+  validate.py    the seven deterministic gates
+  db.py          SQLite: documents, segments, reports, term candidates
+  service.py     background jobs, review→memory loop
+  server.py      FastAPI app
+  export.py      JSONL/JSON/CSV/XLSX/TXT with provenance
+  schemas/       translation-record JSON Schema
+  web/static/    single-page workbench UI
+data/dictionary/ seed glossaries (TCM / Ayurveda / SE-Asian)
+tests/           offline end-to-end suite (mock backend)
+```
+
+## Development
+
+```bash
+export TMTRANS_BACKEND=mock
+pytest            # 20+ offline tests
+```
+
+## License
+
+Apache-2.0. Seed glossary entries are curated from public pharmacopoeial
+nomenclature; verify against your regional pharmacopoeia before clinical use.
+**Not for clinical decision-making.**

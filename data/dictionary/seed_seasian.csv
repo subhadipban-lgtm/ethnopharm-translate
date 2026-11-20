@@ -1,0 +1,36 @@
+entry_id,category,source_lang,source_form,variants,english,binomial,inchikey,family,tradition,pharmacopoeia,notes
+sea-h0001,herb,vi,rau má|Rau má,,gotu kola herb,Centella asiatica,,Apiaceae,se-asian,Vietnamese Pharmacopoeia,asiaticoside; also brahmi-confusion in some traditions
+sea-h0002,herb,vi,nghệ|Nghệ|curcuma,turmeric rhizome,Curcuma longa,,Zingiberaceae,se-asian,Vietnamese Pharmacopoeia,
+sea-h0003,herb,vi,gừng|Gừng,,fresh ginger rhizome,Zingiber officinale,,Zingiberaceae,se-asian,Vietnamese Pharmacopoeia,
+sea-h0004,herb,vi,xạ hương,Xạ hương,musk (moschus),Moschus berezovskii,,Moschidae,se-asian,,CITES Appendix I; synthetic substitution mandatory in most jurisdictions
+sea-h0005,herb,vi,quế|Quế|cinnamon,cinnamon bark,Cinnamomum cassia,,Lauraceae,se-asian,Vietnamese Pharmacopoeia,
+sea-h0006,herb,th,ขมิ้น|khamin|ขมิ้นชัน,turmeric rhizome,Curcuma longa,,Zingiberaceae,se-asian,Thai Herbal Pharmacopoeia,
+sea-h0007,herb,th,ขิง|khing,fresh ginger rhizome,Zingiber officinale,,Zingiberaceae,se-asian,Thai Herbal Pharmacopoeia,
+sea-h0008,herb,th,ข่า|khaa|galangal,galangal rhizome,Alpinia galanga,,Zingiberaceae,se-asian,Thai Herbal Pharmacopoeia,
+sea-h0009,herb,th,ตะไคร้|takhrai|lemongrass,lemongrass,Cymbopogon citratus,,Poaceae,se-asian,Thai Herbal Pharmacopoeia,
+sea-h0010,herb,th,ใบบัวบก|bai bua bok,gotu kola herb,Centella asiatica,,Apiaceae,se-asian,Thai Herbal Pharmacopoeia,
+sea-h0011,herb,th,ฟ้าทะลายโจร|fa thalai chon,green chiretta herb,Andrographis paniculata,,Acanthaceae,se-asian,Thai Herbal Pharmacopoeia,andrographolide; traditional fever remedy
+sea-h0012,herb,th,กระชาย|krachai,lesser galangal / krachai,Boesenbergia rotunda,,Zingiberaceae,se-asian,Thai Herbal Pharmacopoeia,syn. Boesenbergia pandurata
+sea-h0013,herb,th,ไพล|phlai,cassumunar ginger,Zingiber montanum,,Zingiberaceae,se-asian,Thai Herbal Pharmacopoeia,syn. Zingiber cassumunar
+sea-h0014,herb,th,ยานาง|yanang,tiliacora vine leaf,Tiliacora triandra,,Menispermaceae,se-asian,,traditional coolant; microtoxicity cautions
+sea-h0015,herb,id,temulawak|Temulawak,Javanese turmeric rhizome,Curcuma xanthorrhiza,,Zingiberaceae,se-asian,Farmakope Herbal Indonesia,jamu ingredient
+sea-h0016,herb,id,kunyit|Kunyit,turmeric rhizome,Curcuma longa,,Zingiberaceae,se-asian,Farmakope Herbal Indonesia,
+sea-h0017,herb,id,jahe|Jahe,ginger rhizome,Zingiber officinale,,Zingiberaceae,se-asian,Farmakope Herbal Indonesia,
+sea-h0018,herb,id,kumis kucing|Kumis kucing,Java tea leaf,Orthosiphon aristatus,,Lamiaceae,se-asian,Farmakope Herbal Indonesia,traditional kidney remedy
+sea-h0019,herb,id,sambiloto|Sambiloto,green chiretta herb,Andrographis paniculata,,Acanthaceae,se-asian,Farmakope Herbal Indonesia,
+sea-h0020,herb,id,meniran|Meniran,stonebreaker herb,Phyllanthus niruri,,Phyllanthaceae,se-asian,Farmakope Herbal Indonesia,
+sea-h0021,herb,id,binahong|Binahong,madeira vine leaf,Anredera cordifolia,,Basellaceae,se-asian,,folk wound remedy
+sea-h0022,herb,id,jamu,Jamu,jamu (herbal medicine tradition),,,,se-asian,,Indonesian traditional medicine system; not a single herb
+sea-h0023,herb,km,ស្លឹកបូជា|sluk bo chea|neem,neem leaf,Azadirachta indica,,Meliaceae,se-asian,,Khmer traditional medicine
+sea-h0024,herb,my,နံနံ|nan-nan|lemongrass,lemongrass,Cymbopogon citratus,,Poaceae,se-asian,,Myanmar traditional medicine
+sea-h0025,herb,ms,tongkat ali|Tongkat Ali|eurycoma,tongkat ali root,Eurycoma longifolia,,Simaroubaceae,se-asian,,Malay traditional medicine; quassinoids
+sea-h0026,herb,ms,kacip fatimah|Kacip Fatimah,kacip fatimah herb,Labisia pumila,,Primulaceae,se-asian,,Malay traditional medicine
+sea-h0027,herb,tl,lagundi|Lagundi|Vitex negundo,five-leaved chaste tree leaf,Vitex negundo,,Lamiaceae,se-asian,Philippine Pharmacopoeia,approved DOH herbal medicine
+sea-h0028,herb,tl,sambong|Sambong|Blumea balsamifera,sambong leaf,Blumea balsamifera,,Asteraceae,se-asian,Philippine Pharmacopoeia,DOH-approved diuretic
+sea-h0029,herb,tl,tsaang gubat|Tsaang gubat|Carmona retusa,scorpionbush leaf,Carmona retusa,,Boraginaceae,se-asian,,traditional antispasmodic tea
+sea-h0030,herb,tl,ampalaya|Ampalaya|Momordica charantia,bitter melon,Momordica charantia,,Cucurbitaceae,se-asian,,charantin; traditional antidiabetic
+sea-c0001,concept,th,ยาโดม|ya dom,ya dom (herbal inhalant),,,,se-asian,,Thai dosage form
+sea-c0002,concept,th,ยาหม่อง|ya mong,ya mong (herbal balm),,,,se-asian,,Thai dosage form
+sea-c0003,concept,id,jamu gendong,,jamu gendong (fresh jamu sold by carriers),,,,se-asian,,cultural practice term
+sea-c0004,concept,vi,thuốc nam|Thuốc nam,thuoc nam (southern/Vietnamese herbal medicine),,,,se-asian,,Vietnamese traditional pharmacy tradition
+sea-c0005,concept,vi,thuốc bắc|Thuốc bắc,thuoc bac (northern/Sino-Vietnamese medicine),,,,se-asian,,TCM-derived tradition

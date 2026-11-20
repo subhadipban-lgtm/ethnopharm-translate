@@ -1,0 +1,33 @@
+# tmtrans configuration. Environment variables override these values.
+backend:
+  kind: openai_compat            # openai_compat | mock
+  base_url: http://localhost:11434/v1   # Ollama. vLLM: http://localhost:8000/v1
+  model: qwen2.5:7b-instruct     # any instruct model served by the endpoint
+  api_key: ""                    # only needed for hosted providers
+  temperature: 0.1
+  max_tokens: 2048
+
+server:
+  host: 127.0.0.1
+  port: 8765
+
+paths:
+  db: data/tmtrans.db
+  dictionaries:
+    - data/dictionary/seed_tcm.csv
+    - data/dictionary/seed_ayurveda.csv
+    - data/dictionary/seed_seasian.csv
+    - data/dictionary/custom.csv
+  # Optional: one accepted binomial per line. Export from the NP-Alpha
+  # Gate-A LOTUS registry to constrain binomial validation.
+  registry: null
+
+validation:
+  residual_script_warn: 0.05
+  residual_script_error: 0.25
+  length_ratio_bounds: [0.15, 8.0]
+
+review:
+  # auto_pass segments still enter the review queue for spot-checking;
+  # only human-approved pairs feed the RAG translation memory.
+  require_human_approval_for_memory: true

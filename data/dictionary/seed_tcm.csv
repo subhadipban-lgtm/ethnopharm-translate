@@ -1,0 +1,58 @@
+entry_id,category,source_lang,source_form,variants,english,binomial,inchikey,family,tradition,pharmacopoeia,notes
+tcm-h0001,herb,zh,甘草,甘草根|国老,liquorice root,Glycyrrhiza uralensis,,Fabaceae,tcm,ChP 2020,Gan Cao; harmonises formulas
+tcm-h0002,herb,zh,黄芪,黄耆,astragalus root,Astragalus membranaceus,,Fabaceae,tcm,ChP 2020,Huang Qi
+tcm-h0003,herb,zh,人参,人葠|棒槌,ginseng root,Panax ginseng,,Araliaceae,tcm,ChP 2020,Ren Shen
+tcm-h0004,herb,zh,当归,秦归|云归,Chinese angelica root,Angelica sinensis,,Apiaceae,tcm,ChP 2020,Dang Gui
+tcm-h0005,herb,zh,黄连,川连|味连,coptis rhizome,Coptis chinensis,,Ranunculaceae,tcm,ChP 2020,Huang Lian; berberine source
+tcm-h0006,herb,zh,黄芩,山茶根|土金茶根,baical skullcap root,Scutellaria baicalensis,,Lamiaceae,tcm,ChP 2020,Huang Qin; baicalin source
+tcm-h0007,herb,zh,黄柏,黄檗|川黄柏,amur cork-tree bark,Phellodendron amurense,,Rutaceae,tcm,ChP 2020,Huang Bai
+tcm-h0008,herb,zh,大黄,将军|川军,rhubarb root and rhizome,Rheum palmatum,,Polygonaceae,tcm,ChP 2020,Da Huang; purgative
+tcm-h0009,herb,zh,麻黄,草麻黄,ephedra herb,Ephedra sinica,,Ephedraceae,tcm,ChP 2020,Ma Huang; ephedrine source
+tcm-h0010,herb,zh,桂枝,桂心,cinnamon twig,Cinnamomum cassia,,Lauraceae,tcm,ChP 2020,Gui Zhi
+tcm-h0011,herb,zh,柴胡,北柴胡|南柴胡,bupleurum root,Bupleurum chinense,,Apiaceae,tcm,ChP 2020,Chai Hu
+tcm-h0012,herb,zh,半夏,地文|守田,pinellia tuber,Pinellia ternata,,Araceae,tcm,ChP 2020,Ban Xia; processed to reduce toxicity
+tcm-h0013,herb,zh,茯苓,云苓|茯灵,poria sclerotium,Wolfiporia cocos,,Polyporaceae,tcm,ChP 2020,Fu Ling
+tcm-h0014,herb,zh,白术,于术|冬术,atractylodes rhizome,Atractylodes macrocephala,,Asteraceae,tcm,ChP 2020,Bai Zhu
+tcm-h0015,herb,zh,陈皮,橘皮|广陈皮,aged tangerine peel,Citrus reticulata,,Rutaceae,tcm,ChP 2020,Chen Pi
+tcm-h0016,herb,zh,金银花,忍冬花|双花,honeysuckle flower,Lonicera japonica,,Caprifoliaceae,tcm,ChP 2020,Jin Yin Hua
+tcm-h0017,herb,zh,连翘,青翘|老翘,forsythia fruit,Forsythia suspensa,,Oleaceae,tcm,ChP 2020,Lian Qiao
+tcm-h0018,herb,zh,板蓝根,靛蓝根|蓝靛根,isatis root,Isatis indigotica,,Brassicaceae,tcm,ChP 2020,Ban Lan Gen
+tcm-h0019,herb,zh,川芎,芎䓖|西川芎,chuanxiong rhizome,Conioselinum anthriscoides,,Apiaceae,tcm,ChP 2020,Chuan Xiong; ligustilide source
+tcm-h0020,herb,zh,丹参,赤参|紫丹参,danshen root,Salvia miltiorrhiza,,Lamiaceae,tcm,ChP 2020,Dan Shen; tanshinones
+tcm-h0021,herb,zh,三七,田七|金不换,notoginseng root,Panax notoginseng,,Araliaceae,tcm,ChP 2020,San Qi
+tcm-h0022,herb,zh,枸杞,枸杞子|地骨子,goji berry,Lycium barbarum,,Solanaceae,tcm,ChP 2020,Gou Qi Zi
+tcm-h0023,herb,zh,灵芝,赤芝|紫芝,reishi mushroom,Ganoderma lucidum,,Ganodermataceae,tcm,ChP 2020,Ling Zhi
+tcm-h0024,herb,zh,何首乌,首乌|夜交藤根,fleeceflower root,Reynoutria multiflora,,Polygonaceae,tcm,ChP 2020,He Shou Wu; hepatotoxicity cautions
+tcm-h0025,herb,zh,麻黄根,苦椿菜,ephedra root,Ephedra sinica,,Ephedraceae,tcm,ChP 2020,Ma Huang Gen; distinct from herb
+tcm-h0026,herb,zh,青蒿,黄花蒿,sweet wormwood herb,Artemisia annua,,Asteraceae,tcm,ChP 2020,Qing Hao; artemisinin source
+tcm-h0027,herb,zh,常山,鸡骨常山,dichroa root,Dichroa febrifuga,,Hydrangeaceae,tcm,ChP 2020,Chang Shan; febrifugine source
+tcm-h0028,herb,zh,延胡索,元胡|玄胡索,corydalis tuber,Corydalis yanhusuo,,Papaveraceae,tcm,ChP 2020,Yan Hu Suo
+tcm-h0029,herb,zh,川乌,川乌头,sichuan aconite main root,Aconitum carmichaelii,,Ranunculaceae,tcm,ChP 2020,Chuan Wu; toxic, processed only
+tcm-h0030,herb,zh,附子,附片,processed aconite lateral root,Aconitum carmichaelii,,Ranunculaceae,tcm,ChP 2020,Fu Zi; cardiotoxic if unprocessed
+tcm-f0001,formula,zh,桂枝汤,,Cinnamon Twig Decoction,,,,tcm,Shanghan Lun,Gui Zhi Tang; five-ingredient exterior-releasing formula
+tcm-f0002,formula,zh,麻黄汤,,Ephedra Decoction,,,,tcm,Shanghan Lun,Ma Huang Tang
+tcm-f0003,formula,zh,小柴胡汤,,Minor Bupleurum Decoction,,,,tcm,Shanghan Lun,Xiao Chai Hu Tang
+tcm-f0004,formula,zh,六味地黄丸,,Six-Ingredient Rehmannia Pill,,,,tcm,Pharmacopoeia formula,Liu Wei Di Huang Wan
+tcm-f0005,formula,zh,补中益气汤,,Tonify the Middle and Augment the Qi Decoction,,,,tcm,Pi Wei Lun,Bu Zhong Yi Qi Tang
+tcm-f0006,formula,zh,血府逐瘀汤,,Drive Out Stasis in the Mansion of Blood Decoction,,,,tcm,Yi Lin Gai Cuo,Xue Fu Zhu Yu Tang
+tcm-f0007,formula,zh,银翘散,,Honeysuckle and Forsythia Powder,,,,tcm,Wen Bing Tiao Bian,Yin Qiao San
+tcm-f0008,formula,zh,四君子汤,,Four-Gentlemen Decoction,,,,tcm,Tai Ping Hui Min He Ji Ju Fang,Si Jun Zi Tang
+tcm-f0009,formula,zh,四物汤,,Four-Substance Decoction,,,,tcm,Tai Ping Hui Min He Ji Ju Fang,Si Wu Tang
+tcm-f0010,formula,zh,逍遥散,,Free and Easy Wanderer Powder,,,,tcm,Tai Ping Hui Min He Ji Ju Fang,Xiao Yao San
+tcm-d0001,disease,zh,风寒,伤风,wind-cold,,,,tcm,,exterior pattern; not a biomedical diagnosis
+tcm-d0002,disease,zh,风热,,wind-heat,,,,tcm,,exterior pattern
+tcm-d0003,disease,zh,气虚,,qi deficiency,,,,tcm,,pattern
+tcm-d0004,disease,zh,血瘀,,blood stasis,,,,tcm,,pattern
+tcm-d0005,disease,zh,肝郁气滞,,liver qi stagnation,,,,tcm,,pattern
+tcm-d0006,disease,zh,脾虚湿盛,,spleen deficiency with dampness,,,,tcm,,pattern
+tcm-d0007,disease,zh,阴虚火旺,,yin deficiency with effulgent fire,,,,tcm,,pattern
+tcm-c0001,concept,zh,气,氣,qi,,,,tcm,,keep as qi; do not translate as energy
+tcm-c0002,concept,zh,阴阳,陰陽,yin and yang,,,,tcm,,
+tcm-c0003,concept,zh,五行,,five phases,,,,tcm,,not five elements per current WHO terminology
+tcm-c0004,concept,zh,经络,經絡,meridians and collaterals,,,,tcm,,
+tcm-c0005,concept,zh,穴位,腧穴,acupoint,,,,tcm,,
+tcm-c0006,concept,zh,归经,歸經,channel tropism,,,,tcm,,
+tcm-c0007,concept,zh,炮制,炮製,processing (pao zhi),,,,tcm,,traditional drug processing
+tcm-c0008,concept,zh,君臣佐使,,sovereign-minister-assistant-courier,,,,tcm,,formula role hierarchy
+tcm-c0009,concept,zh,四气,四氣,four qi (natures),,,,tcm,,cold hot warm cool
+tcm-c0010,concept,zh,五味,,five flavours,,,,tcm,,sour bitter sweet pungent salty

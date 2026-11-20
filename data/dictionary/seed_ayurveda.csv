@@ -1,0 +1,48 @@
+entry_id,category,source_lang,source_form,variants,english,binomial,inchikey,family,tradition,pharmacopoeia,notes
+ayu-h0001,herb,sa,अश्वगन्धा,aśvagandhā|ashwagandha,ashwagandha root,Withania somnifera,,Solanaceae,ayurveda,API,withanolides; rasayana
+ayu-h0002,herb,sa,हरीतकी,harītakī|haritaki|हरड़,chebulic myrobalan fruit,Terminalia chebula,,Combretaceae,ayurveda,API,component of triphala
+ayu-h0003,herb,sa,विभीतकी,vibhītakī|bibhitaki|बहेड़ा,belleric myrobalan fruit,Terminalia bellirica,,Combretaceae,ayurveda,API,component of triphala
+ayu-h0004,herb,sa,आमलकी,āmalakī|amla|आँवला,Indian gooseberry fruit,Phyllanthus emblica,,Phyllanthaceae,ayurveda,API,component of triphala; vitamin C
+ayu-h0005,herb,sa,गुडूची,guḍūcī|giloy|गिलोय,guduchi stem,Tinospora cordifolia,,Menispermaceae,ayurveda,API,amrita; immunomodulant
+ayu-h0006,herb,sa,तुलसी,tulasī|tulsi,holy basil leaf,Ocimum tenuiflorum,,Lamiaceae,ayurveda,API,syn. Ocimum sanctum
+ayu-h0007,herb,sa,ब्राह्मी,brāhmī|brahmi,brahmi herb,Bacopa monnieri,,Plantaginaceae,ayurveda,API,medhya rasayana; bacosides
+ayu-h0008,herb,sa,शतावरी,śatāvarī|shatavari,shatavari root,Asparagus racemosus,,Asparagaceae,ayurveda,API,galactagogue rasayana
+ayu-h0009,herb,sa,हल्दी,haldī|हरिद्रा|haridrā,turmeric rhizome,Curcuma longa,,Zingiberaceae,ayurveda,API,curcumin source
+ayu-h0010,herb,sa,नीम,nīm|निम्ब|nimba,neem leaf and bark,Azadirachta indica,,Meliaceae,ayurveda,API,azadirachtin source
+ayu-h0011,herb,sa,त्रिफला,triphalā,triphala (three-fruit compound),,,,ayurveda,API,formula-grade entry: haritaki+bibhitaki+amalaki
+ayu-h0012,herb,sa,त्रिकटु,trikaṭu,trikatu (three-pungent compound),,,,ayurveda,API,long pepper+black pepper+ginger
+ayu-h0013,herb,sa,पिप्पली,pippalī|पिप्पल,long pepper fruit,Piper longum,,Piperaceae,ayurveda,API,piperine source
+ayu-h0014,herb,sa,मरिच,marica|मिर्च,black pepper fruit,Piper nigrum,,Piperaceae,ayurveda,API,
+ayu-h0015,herb,sa,शुण्ठी,śuṇṭhī|सोंठ|sonth,dried ginger rhizome,Zingiber officinale,,Zingiberaceae,ayurveda,API,shunthi = dried; ardraka = fresh
+ayu-h0016,herb,sa,गोग्गुलु,guggulu|गुग्गुल,guggul oleo-gum-resin,Commiphora wightii,,Burseraceae,ayurveda,API,guggulsterones
+ayu-h0017,herb,sa,शल्लकी,śallakī|सालाई,Indian frankincense resin,Boswellia serrata,,Burseraceae,ayurveda,API,boswellic acids
+ayu-h0018,herb,sa,चन्दन,candana|चंदन,sandalwood heartwood,Santalum album,,Santalaceae,ayurveda,API,
+ayu-h0019,herb,sa,चित्रक,citraka|चीता,leadwort root,Plumbago zeylanica,,Plumbaginaceae,ayurveda,API,plumbagin source
+ayu-h0020,herb,sa,भृङ्गराज,bhṛṅgarāja|भांगरा,bhringraj herb,Eclipta prostrata,,Asteraceae,ayurveda,API,syn. Eclipta alba
+ayu-h0021,herb,sa,शंखपुष्पी,śaṅkhapuṣpī|shankhpushpi,shankhpushpi herb,Convolvulus pluricaulis,,Convolvulaceae,ayurveda,API,medhya
+ayu-h0022,herb,sa,अर्जुन,arjuna|अर्जुन त्वक्,arjuna bark,Terminalia arjuna,,Combretaceae,ayurveda,API,cardiotonic tradition
+ayu-h0023,herb,sa,मधुयष्टि,madhuyaṣṭi|यष्टिमधु|मुलेठी,liquorice root,Glycyrrhiza glabra,,Fabaceae,ayurveda,API,yashtimadhu
+ayu-h0024,herb,sa,विडङ्ग,viḍaṅga|बाङभिरङ्ग,false black pepper fruit,Embelia ribes,,Primulaceae,ayurveda,API,embelin source
+ayu-h0025,herb,sa,कुष्ठ,kuṣṭha|कुट,costus root,Saussurea costus,,Asteraceae,ayurveda,API,CITES-listed; check trade legality
+ayu-f0001,formula,sa,च्यवनप्राश,cyavanaprāśa|chyawanprash,chyawanprash avaleha,,,,ayurveda,API,classical herbal jam
+ayu-f0002,formula,sa,दशमूल,daśamūla|dashamoola,dashamoola (ten-root compound),,,,ayurveda,API,bilva agnimantha gambhari patala etc
+ayu-f0003,formula,sa,त्रिफलाचूर्ण,triphalā cūrṇa,triphala churna powder,,,,ayurveda,API,
+ayu-f0004,formula,sa,सितोपलादिचूर्ण,sitopalādi cūrṇa,sitopaladi churna,,,,ayurveda,API,classical respiratory formula
+ayu-f0005,formula,sa,अश्वगन्धादिचूर्ण,aśvagandhādi cūrṇa,ashwagandhadi churna,,,,ayurveda,API,
+ayu-d0001,disease,sa,ज्वर,jvara|ज्वरः,fever (jvara),,,,ayurveda,Charaka Samhita,classical nosology
+ayu-d0002,disease,sa,प्रमेह,prameha,prameha (urinary/metabolic disorder complex),,,,ayurveda,Charaka Samhita,do not equate 1:1 with diabetes
+ayu-d0003,disease,sa,अम्लपित्त,amlapitta,amlapitta (acid-peptic disorder pattern),,,,ayurveda,,hyperacidity pattern
+ayu-d0004,disease,sa,श्वास,śvāsa|श्वासरोग,shvasa (dyspnoea/respiratory disorder),,,,ayurveda,Charaka Samhita,
+ayu-d0005,disease,sa,कुष्ठरोग,kuṣṭharoga,kushtha (skin disease complex),,,,ayurveda,,distinct from herb kushtha
+ayu-c0001,concept,sa,दोष,doṣa|dosha,dosha,,,,ayurveda,,vata pitta kapha
+ayu-c0002,concept,sa,वात,vāta|vata,vata dosha,,,,ayurveda,,
+ayu-c0003,concept,sa,पित्त,pitta,pitta dosha,,,,ayurveda,,
+ayu-c0004,concept,sa,कफ,kapha,kapha dosha,,,,ayurveda,,
+ayu-c0005,concept,sa,धातु,dhātu|dhatu,dhatu (tissue),,,,ayurveda,,seven dhatus
+ayu-c0006,concept,sa,मल,mala,mala (waste product),,,,ayurveda,,
+ayu-c0007,concept,sa,अग्नि,agni|अग्निः,agni (digestive fire),,,,ayurveda,,keep as agni
+ayu-c0008,concept,sa,आम,āma|aama,ama (metabolic toxin concept),,,,ayurveda,,not ammonia
+ayu-c0009,concept,sa,रसायन,rasāyana|rasayana,rasayana (rejuvenative therapy),,,,ayurveda,,
+ayu-c0010,concept,sa,पञ्चकर्म,pañcakarma|panchakarma,panchakarma,,,,ayurveda,,five purification procedures
+ayu-c0011,concept,sa,भावना,bhāvanā,bhavana (trituration with liquid),,,,ayurveda,,pharmaceutical process
+ayu-c0012,concept,sa,भस्म,bhasma,bhasma (calcined preparation),,,,ayurveda,,herbo-mineral ash; safety-critical
