@@ -1,0 +1,14 @@
+{
+  "dataset_id": "FrancophonIA/MeSpEn_Glossaries",
+  "license_hf_api_tag": "license:cc-by-4.0",
+  "license_hf_cardData": "cc-by-4.0",
+  "gated": false,
+  "private": false,
+  "downloads_at_audit": 402,
+  "last_modified": "2025-03-30T15:57:02.000Z",
+  "tasks_supported": [
+    "glossary adherence / Gate G3 stress test"
+  ],
+  "format_notes": "TSV glossaries downloaded at runtime: Chinese_English_medglossaries.tsv (3.6 MB, ~100k term pairs), English_Thai_medglossaries.tsv. No datasets-server access (script dataset); raw TSVs fetched from repo.",
+  "used_for": "glossary-adherence dataset category (Part C), binding-constraint ablation (Part D)"
+}

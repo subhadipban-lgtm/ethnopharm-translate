@@ -1,0 +1,14 @@
+{
+  "dataset_id": "DFKI-SLT/BotanicalNER",
+  "license_hf_api_tag": "license:gpl-3.0",
+  "license_hf_cardData": "gpl-3.0",
+  "gated": false,
+  "private": false,
+  "downloads_at_audit": 17,
+  "last_modified": "2025-09-11T09:47:14.000Z",
+  "tasks_supported": [
+    "species gazetteer (not used)"
+  ],
+  "format_notes": "License is GPL-3.0 (copyleft), NOT commercial-only as previously stated. GPL-3.0 is incompatible with committing derived data into this Apache-2.0 repo. DROPPED: no data committed or used; substituted by USDA 400-row CC BY 4.0 sample species list.",
+  "used_for": "NOT USED — GPL-3.0 license incompatibility (see NOT_VALIDATED.md)"
+}

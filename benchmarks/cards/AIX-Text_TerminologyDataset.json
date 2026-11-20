@@ -1,0 +1,14 @@
+{
+  "dataset_id": "AIX-Text/TerminologyDataset",
+  "license_hf_api_tag": "license:mit",
+  "license_hf_cardData": "mit",
+  "gated": false,
+  "private": false,
+  "downloads_at_audit": 95,
+  "last_modified": "2024-10-22T06:15:01.000Z",
+  "tasks_supported": [
+    "supplementary terminology source"
+  ],
+  "format_notes": "Per-language coverage unverified for zh/lo/km; not used in runs.",
+  "used_for": "NOT USED in runs"
+}

@@ -1,0 +1,15 @@
+{
+  "dataset_id": "Gare/Classical_Chinese_to_Modern_Chinese",
+  "license_hf_api_tag": "license:mit",
+  "license_hf_cardData": "mit",
+  "gated": false,
+  "private": false,
+  "downloads_at_audit": 48,
+  "last_modified": "2022-03-26T07:47:40.000Z",
+  "tasks_supported": [
+    "classical->modern stage validation (translation quality)",
+    "segmentation/pipeline reproducibility"
+  ],
+  "format_notes": "Interleaved single text column: rows alternate '古文：...' / '现代文：...'. 6 rows = 3 (source, reference) pairs. IS a parallel corpus (not metadata-only). Single split 'default/train'.",
+  "used_for": "classical-zh dataset category (Part C), classical rewrite ablation (Part D)"
+}
