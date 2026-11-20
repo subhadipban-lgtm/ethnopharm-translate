@@ -82,3 +82,79 @@ delta quantifies the residual nondeterminism.
 | G6 pass rate | = 1.0 | zero-tolerance |
 | G7 pass rate | ≥ 0.95 | pass criterion |
 | Reproducibility | chrF++ delta ≤ 2.0 | pass criterion |
+
+---
+
+# v3 corrections and definitions (2026-11-21, validation/v3)
+
+## Row classes (Part B)
+
+- **Translation-quality rows (8):** classical-zh, glossary-adherence, and the
+  six NTREX rows (en-th, th-en, en-lo, lo-en, en-km, km-en). These have
+  (source, reference) pairs and chrF is meaningful (with the classical-zh
+  smoke-test caveat below).
+- **Gate-only rows (2):** hallucination-check (adversarial construction, its
+  references are synthetic prompts) and usda-dosage (en→en dosage probes;
+  42% of outputs are verbatim copies of the source, so chrF 64.75 is **not
+  interpretable as translation quality** — decision (b): use usda-dosage for
+  G6/G2 gate validation only).
+- **Smoke test (subset of quality rows):** classical-zh has n = 3 with
+  inferred parallelism (see NOT_VALIDATED.md); its chrF evidences that the
+  classical→modern stage runs and is load-bearing (3.32 → 0.0 when disabled),
+  not translation quality per se.
+
+chrF≥40 failure counts are therefore reported three ways: 7/10 (all rows),
+6/8 (quality rows), 5/7 (quality rows minus the n=3 smoke test).
+
+## G2 (non_empty gate) semantics — v3 clarification
+
+The program's `non_empty` gate fails on **empty OR verbatim-copy** outputs
+("translation identical to source"). `G2_nonempty_pass_rate` in the CSVs is
+the program-gate value (continuous with v2 summary.json); the decomposition
+columns `G2_empty_output_count` and `G2_copy_output_count` show the mechanism.
+Copy outputs pass G6 by construction (all source numbers survive), inflating
+headline G6 rates; `G6_noncopy_pass_rate` is the non-trivial rate.
+
+## G3 (glossary binding) applicability rule
+
+**G3 reports n/a when no glossary term matches the scored source text.**
+A value of 1.0 is reserved for rows with a non-empty applicable glossary.
+Rows with n/a: all six NTREX rows (news text, no glossary matches), usda-dosage
+(English probe text, no zh/sa/th matches), classical-zh (scored artifact is a
+modern-Chinese rewrite; English renderings not applicable). Reportable rows:
+glossary-adherence and hallucination-check only.
+
+## G5 — two distinct metrics (v3)
+
+- **Escape rate (safety floor):** G5_escaped / G5_generated. Zero escapes
+  means every candidate the detector flagged was blocked from auto_pass.
+  **An escape rate of 0 is a floor on safety, not evidence of detection
+  accuracy** — a detector that flags everything achieves it trivially.
+- **Detection precision (accuracy):** TP / (TP + FP) over manually labelled
+  detections (`results/v3/g5_precision.csv`). v3 labels: NTREX 0% (0 TP / 50
+  FP — sentence-boundary noise), adversarial set 40% (4 TP / 6 FP), glossary
+  0% (chemical names, 2 of which were *correct* renderings).
+- Per the <50% precision rule, G5 is described in v3 as a **species-name
+  guardrail that requires an in-domain source**, not a general hallucination
+  detector.
+
+## G6 — zero-tolerance threshold (explicit)
+
+Pre-registered threshold: **G6 pass rate = 1.0 (zero tolerance)** — any
+dropped dosage/number token is a safety-critical failure for a medical-adjacent
+tool. v3 results fail this on 2 of 3 applicable rows (glossary-adherence 0.80,
+usda-dosage 0.875; non-copy rates 0.793 / 0.786). This is recorded as a
+**safety-threshold failure**, not a pass.
+
+## usda-dosage chrF interpretability (Part F decision)
+
+Decision **(b)**: usda-dosage chrF = 64.75 is marked **not interpretable as
+translation quality** (20/48 outputs are verbatim copies by the en→en probe
+design). The dataset is used for G2/G6 gate validation only.
+
+## Reproducibility metric (v3 extension)
+
+chrF absolute deltas between two temperature-0 runs on glossary-adherence
+(n=30) and usda-dosage (n=48), seed 42, plus comparison against the v2
+baselines. The classical-zh delta (0.00) is retained as a footnote only
+(n=3, uninformative for variance). See results/v3/reproducibility.json.

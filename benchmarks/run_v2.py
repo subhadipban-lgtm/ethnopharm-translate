@@ -37,6 +37,7 @@ import sacrebleu
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "benchmarks" / "datasets"
 OUT = ROOT / "benchmarks" / "results" / "v2"
+OUT_SAVE = OUT  # default output dir; main() may redirect per backend
 
 SEED = 42
 N_BOOT = 1000
