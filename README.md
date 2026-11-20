@@ -340,7 +340,7 @@ tests/           offline end-to-end suite (mock backend)
 
 ```bash
 export TMTRANS_BACKEND=mock
-pytest            # 20+ offline tests
+pytest            # 33 offline tests (mock backends, no model needed)
 ```
 
 ## License
