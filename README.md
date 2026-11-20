@@ -162,20 +162,101 @@ recommended for wide palm-leaf / Samut Khoi folios where full-page inference
 blurs small diacritics; whole-page mode is fine for printed or high-resolution
 scans, and Qwen2.5-VL handles vertical column ordering natively.
 
-## CLI
+## CLI guide
+
+Everything runs through the single `tmtrans` command after activating the
+environment:
+
+```bash
+cd ethnopharm-translate
+source .venv/bin/activate        # or call .venv/bin/tmtrans directly
+```
+
+### 1. Point it at your model
+
+```bash
+export TMTRANS_BACKEND=openai_compat
+export TMTRANS_BASE_URL=http://localhost:11434/v1   # Ollama
+export TMTRANS_MODEL=qwen2.5:7b-instruct
+# vLLM instead:
+#   TMTRANS_BASE_URL=http://localhost:8000/v1  TMTRANS_MODEL=Qwen/Qwen2.5-7B-Instruct
+
+tmtrans doctor     # checks endpoint reachability + glossary load
+```
+
+For OCR, set `TMTRANS_OCR_MODEL` (default `Qwen/Qwen2.5-VL-7B-Instruct`,
+served with `vllm serve Qwen/Qwen2.5-VL-7B-Instruct --max-model-len 16384`);
+it reuses `TMTRANS_BASE_URL` unless `TMTRANS_OCR_BASE_URL` is set.
+
+No GPU handy? `export TMTRANS_BACKEND=mock TMTRANS_OCR_BACKEND=mock` runs the
+entire pipeline offline for testing.
+
+### 2. Subcommands
+
+| Command | What it does |
+|---|---|
+| `tmtrans serve` | Web workbench at http://127.0.0.1:8765 (`--host/--port` to change) |
+| `tmtrans translate <file>` | Translate txt/md/html/pdf/OCR-JSONL into bilingual exports |
+| `tmtrans ocr <folder>` | OCR a folder of scans to JSONL, optionally chain into translation |
+| `tmtrans export <doc_id>` | Re-export a document from the database |
+| `tmtrans glossary import/stats/export` | Manage the bilingual dictionary |
+| `tmtrans doctor` | Health check |
+
+Global flags on any subcommand: `--db` (default `data/tmtrans.db`) and
+`--dictionary path.csv` (repeatable; defaults to the seed glossaries).
+
+### 3. Typical workflows
+
+**Plain text file:**
 
 ```bash
 tmtrans translate chapter.txt --lang lzh --variant classical --out outputs/
-tmtrans export <doc_id> --fmt jsonl --approved-only
-tmtrans export <doc_id> --fmt xlsx            # colour-coded review sheet
-tmtrans glossary import my_terms.csv          # append to data/dictionary/custom.csv
-tmtrans glossary stats
 ```
 
-`--lang` accepts: `zh` (modern Chinese), `lzh` (classical Chinese), `sa`
-(Sanskrit), `pi` (Pali), `hi`, `ta`, `th`, `km`, `lo`, `my`, `vi`, `id`, `ms`,
-`tl`. Classical variants insert a classical→modern rewrite stage before
-English translation.
+`--lang` accepts `zh, lzh, sa, pi, hi, ta, th, km, lo, my, vi, id, ms, tl`;
+classical variants insert a classical→modern rewrite stage before English
+translation. Output: `outputs/<doc_id>.jsonl`, `.csv` and `.json` with
+per-segment validation reports; the doc ID is printed at the end.
+
+**Manuscript scans (OCR → translate in one chained run):**
+
+```bash
+tmtrans ocr scans/ --lang lzh --reading-order rtl-columns --translate
+# palm-leaf / Samut Khoi, line-crop mode for small diacritics:
+tmtrans ocr palmleaf/ --lang sa --iast --line-segmentation surya --translate
+```
+
+Or stage them separately (sequential VRAM use on one GPU): drop `--translate`,
+then later run `tmtrans translate outputs/ocr-<ts>.jsonl --lang lzh` — the
+JSONL is a durable checkpoint, so you can retranslate without re-OCR'ing.
+
+**Review and final export:** CLI translate writes its database to
+`outputs/tmtrans-cli.db`, and approval is a human step done in the web UI —
+open that same database in the workbench:
+
+```bash
+tmtrans serve --db outputs/tmtrans-cli.db
+# ... approve/edit segments in the browser ...
+tmtrans export <doc_id> --fmt xlsx --db outputs/tmtrans-cli.db            # colour-coded review sheet
+tmtrans export <doc_id> --fmt jsonl --approved-only --db outputs/tmtrans-cli.db   # final corpus, approved only
+```
+
+The `--db` flag is the one gotcha: `export` defaults to `data/tmtrans.db`
+(what `serve` uses), while CLI-translated documents live in the out-dir
+database — pass the right one.
+
+**Dictionary:**
+
+```bash
+tmtrans glossary stats                        # entries by language/category
+tmtrans glossary import my_terms.csv          # appended to data/dictionary/custom.csv, effective immediately
+tmtrans glossary export --out outputs/glossary.csv
+```
+
+The CLI never marks anything "approved" — that is deliberate. `auto_pass`
+from the validation gates is not acceptance; only your approval in the review
+UI promotes segments, and only approved pairs feed the RAG translation memory
+and the `--approved-only` exports.
 
 ## The dictionary is the backbone
 
