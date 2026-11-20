@@ -134,3 +134,69 @@ were inaccessible/unlicensed for use — see NOT_VALIDATED.md).
   and the gate's catch behavior. Could not surface: subtle plausible-looking
   substitutions (the fabricated names are obvious).
 - **usda-dosage:** dosage/number preservation on real ethnobotanical rows.
+---
+
+# v3 additions (2026-11-21)
+
+## 9. G5 false positives (real detections from results/v3/g5_precision.csv)
+
+The species-regex `[Capitalized] [lowercase]` matches sentence boundaries and
+news entities. All 50 NTREX detections are false positives (precision 0%):
+
+- `Congress said` (th-en idx=4) — "One member of the Workers' Congress said…";
+  institution + verb, matched mid-sentence.
+- `Some even` (th-en idx=1) — sentence-initial adverb phrase.
+- `French people` (km-en idx=19) — demonym phrase; the sentence itself is a
+  hallucination but the span is not species-name-like.
+- `Khmu people` (lo-en idx=7) — ethnic-group name inside a wholly hallucinated
+  sentence ("The Khmu people of Laos are involved in the production of soap"
+  for a Welsh-politics source). FP for the species guardrail, but a genuine
+  entity-level hallucination — evidence that G5 does not catch what actually
+  went wrong here.
+- `Ellos que` (th-en idx=17) — the model answered in **Spanish** ("Ellos que
+  tienen derecho a votar…") for a Thai source; the regex matched the Spanish
+  phrase. A severe language-switch failure that G5 labels as a "binomial".
+- `Please provide` (hallucination-check idx=8) — imperative phrase from an
+  instruction-following output.
+
+Worse: 2 of the 3 glossary-adherence flags were **correct** renderings
+(`10-Hydroxydecylenic acid`, `Hydroxydecenoic acid` — exact glossary
+reference strings). The gate blocks right answers on chemical nomenclature.
+
+## 10. G2 failures (empty and copy outputs)
+
+The v3 audit premise said "20 of 48 usda-dosage outputs are empty." The
+JSONLs show **0 empty and 20 verbatim copies** (hypothesis ≡ source). The
+program's G2 gate counts both; the mechanism is copy, not empty:
+
+- Copy (usda idx=6): src `Preparation of Frangula purshiana with dosage
+  IC50=20-60 ug/ml` → hyp identical. en→en probe echo.
+- Copy (usda idx=7): src `Preparation of Dioscorea pentaphylla with dosage
+  FEMA 6,000` → hyp identical.
+- Copy (usda idx=8): src `Preparation of Cistus ladaniferus with dosage
+  MIC=800-1,600 ug/ml` → hyp identical.
+- True empty (classical-zh idx=0): modern stage produced empty rewrite while
+  the raw English output existed — the only genuine empty in the corpus.
+- Copy (glossary-adherence idx=18): `13-顺-维甲酸` → `Ro acutane` matched its
+  source-side glossary constraint verbatim (the source column contained Latin).
+
+## 11. G6 dosage/number failures (real examples)
+
+Genuine value corruption (safety-critical):
+- usda idx=0: src `EC100=50 uM` → hyp `EC150 dosage = 50 uM` — the potency
+  label **changed value** (100→150). Silent dosage corruption.
+- usda idx=29: src `IC100=2 mM` → hyp `IC150=2 mM` — same corruption pattern.
+- glossary idx=29: src `180° plane rotation pulse` → hyp `185度…` — 180→185.
+
+Gate false positives / encoding shifts (number semantically kept or absent in
+the reference too):
+- glossary idx=18: `13-顺-维甲酸` → `Ro acutane` drops "13", but the gold
+  reference is also `Ro acutane` — the reference itself omits the locant.
+- glossary idx=1: `10-羟基-Δ2-葵烯酸` → `10-Hydroxydecylenic acid` — the Δ2
+  locant is encoded inside the chemical name; gate flags "2" missing.
+- usda idx=15: `750 mg/4x/day` → `750 mg taken four times` — numeric 4x
+  rendered as a word.
+
+Data-quality note: glossary idx=29 is an **inverted MeSpEn row** (English in
+the source column, Chinese reference) — a dataset defect that surfaced only
+because G6 flagged it.

@@ -102,3 +102,37 @@ session was conducted.
    constrains all classical-zh claims.
 3. **Sanskrit OCR dataset access blocked** (401). OCR CER/WER validation is
    blocked; documented above.
+---
+
+# v3 additions (2026-11-21)
+
+1. **G5 detection precision** is characterized only by manual labelling of
+   63 detections (50 on NTREX news, 10 on the adversarial set, 3 on
+   glossary-adherence) — single labeller, no inter-annotator agreement.
+   G5 is **not validated as a general hallucination detector** (NTREX
+   precision 0%); it is a species-name guardrail that requires an in-domain
+   source. Not validated as an entity-level hallucination detector at all —
+   it missed the real entity hallucinations (e.g. "Khmu people" soap
+   sentence) while flagging their sentence boundaries.
+2. **Gare parallelism is inferred**, not verified: pairs are derived from
+   alternating 古文/现代文 lines in a single `text` column
+   (hf_license_audit.json: features=["text"], size=null). n=3 is a pipeline
+   smoke test, not a translation-quality measurement. The HF API returns no
+   dataset size; the datasets-server exposes only a `train` split with 6 rows.
+3. **Reproducibility** was previously measured on n=3 (classical-zh,
+   uninformative). v3 extends it to glossary-adherence (n=30) and
+   usda-dosage (n=48), two temperature-0 runs each — see
+   results/v3/reproducibility.json for the deltas.
+4. **usda-dosage chrF (64.75) is not interpretable** as translation quality:
+   20/48 outputs are verbatim source copies (en→en probe design). The row is
+   used for G2/G6 gate validation only.
+5. **Human review: not validated** (unchanged from v2 — no reviewer session).
+6. **OCR: not validated** (unchanged — Sanskrit OCR dataset returns 401;
+   second dataset unlicensed/unverified).
+7. **TCM-specific model (ShizhenGPT or equivalent): not run** (no 7B runtime
+   in this environment).
+8. **No non-Qwen model was run.** All numbers come from one checkpoint
+   (Qwen2.5-3B-Instruct-4bit); model-family variance is uncharacterized.
+9. **Commercial-only datasets not used:** USDA full registry (76,907 rows).
+10. **MeSpEn data defect surfaced:** at least one inverted row (English in the
+    zh column). The glossary-adherence set inherits such defects.

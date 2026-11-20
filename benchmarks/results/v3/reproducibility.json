@@ -1,0 +1,90 @@
+{
+  "glossary-adherence_run1": {
+    "chrf": 81.66,
+    "chrf_ci": [
+      67.68,
+      94.06
+    ],
+    "bleu": 55.82,
+    "bleu_ci": [
+      30.82,
+      81.05
+    ],
+    "n": 30,
+    "G5": [
+      3,
+      3,
+      0
+    ]
+  },
+  "glossary-adherence_run2": {
+    "chrf": 81.66,
+    "chrf_ci": [
+      67.68,
+      94.06
+    ],
+    "bleu": 55.82,
+    "bleu_ci": [
+      30.82,
+      81.05
+    ],
+    "n": 30,
+    "G5": [
+      3,
+      3,
+      0
+    ]
+  },
+  "usda-dosage_run1": {
+    "chrf": 64.75,
+    "chrf_ci": [
+      62.18,
+      67.1
+    ],
+    "bleu": 33.5,
+    "bleu_ci": [
+      28.81,
+      37.91
+    ],
+    "n": 48,
+    "G5": [
+      0,
+      0,
+      0
+    ]
+  },
+  "usda-dosage_run2": {
+    "chrf": 64.75,
+    "chrf_ci": [
+      62.18,
+      67.1
+    ],
+    "bleu": 33.5,
+    "bleu_ci": [
+      28.81,
+      37.91
+    ],
+    "n": 48,
+    "G5": [
+      0,
+      0,
+      0
+    ]
+  },
+  "glossary-adherence_abs_delta": 0.0,
+  "usda-dosage_abs_delta": 0.0,
+  "glossary-adherence_vs_v2_baseline": [
+    0.0,
+    0.0
+  ],
+  "usda-dosage_vs_v2_baseline": [
+    0.0,
+    0.0
+  ],
+  "classical-zh_footnote": {
+    "note": "n=3 smoke test, uninformative for variance",
+    "run1_chrf": 3.32,
+    "run2_chrf": 3.32,
+    "abs_delta": 0.0
+  }
+}

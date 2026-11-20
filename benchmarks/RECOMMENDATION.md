@@ -1,49 +1,71 @@
 # Recommendation — ethnopharm-translate (tmtrans), intended use: corpus-translation input layer for ethnobotanical discovery
 
-## Verdict: **APPROVE WITH CONDITIONS**
+## Verdict: **APPROVE WITH CONDITIONS** (retained from v2; conditions revised in v3)
 
-### Justification (numbers only)
+## Verdict language (v3, canonical)
 
-On a real model run (`mlx-community/Qwen2.5-3B-Instruct-4bit`, temperature 0,
-seed 42), the workbench's zero-escape property for binomial species names held
-exactly: **G5_escaped = 0/63 across all 10 dataset rows**, including the
-adversarial hallucination-check (10 generated, 10 caught, 0 escaped — the
-correct success criterion for adversarial data) and non-adversarial rows where
-the gate caught 3 (glossary-adherence), 5 (en→lo), 15 (th→en), 16 (lo→en) and
-14 (km→en) candidates with zero escapes. Glossary binding is the dominant
-quality factor: removing RAG retrieval drops glossary-adherence chrF 81.66 →
-38.16; removing the classical→modern stage drops classical-zh chrF 3.32 → 0.00.
-G6 dosage-preservation passed 1.0 on all rows except usda-dosage (0.875) and
-glossary-adherence (0.80 — chemical locants dropped). Reproducibility delta on
-classical-zh chrF is 0.00 across two runs.
+Pipeline is functionally validated on gate mechanics; two safety-threshold
+failures (G2 empty/copy outputs, G6 dosage preservation) block deployment on
+dosage-bearing text; G5 escape = 0 on samples tested but detection precision
+requires remediation.
 
-### Conditions (must hold before production corpus ingestion)
+## Justification (numbers)
 
-1. **G5 over-blocking must be fixed for free-prose output**: on
-   ×→en news text the `Genus species` regex false-positives sentence-boundary
-   pairs ("Some even", "Congress said" — 15/25, 16/25, 14/25 rows flagged on
-   th/lo/km→en). Zero escapes, but the review queue will flood; precision fix
-   (e.g. two-token NER or dictionary-attested-genus filter) required.
-2. **Model upgrade required**: all quality numbers are from a 3B 4-bit model.
-   classical-zh chrF = 3.32 is failure-level for the classical→modern stage;
-   rerun with the recommended 7B-class model (Qwen2.5-7B-Instruct or
-   ShizhenGPT-7B) before signing off translation quality.
-3. **G6 fixes**: IUPAC locant preservation (1,2-/1,4- prefixes) and the
-   empty-output case (1,4-按树脑) must be handled; 4/30 glossary rows and 6/48
-   USDA rows dropped numbers.
-4. **Human review validation**: not performed in this run (no reviewer scored
-   segments). Required before claiming the review workflow is fit for purpose.
-5. **Gare classical-zh has n = 3** — the classical stage needs a larger
-   expert-annotated gold set (the protocol's expert gold-set plan) before any
-   claim about classical-text translation quality.
+The safety floor held: G5_escaped = 0/63 across all rows including the
+adversarial set (10 generated, 10 caught). But v3 surface corrections change
+the risk picture: G2 fails 42% of usda-dosage rows (20/48 verbatim copies,
+1/3 classical-zh true empty), G6 fails the pre-registered zero-tolerance
+threshold on 2 of 3 applicable rows (glossary-adherence 0.80, usda-dosage
+0.875; non-copy rates 0.793/0.786), and three of the G6 failures are genuine
+dosage-value corruptions (EC100→EC150, IC100→IC150, 180°→185°). G5 detection
+precision is 0% on news text (0 TP / 50 FP) and 40% on the adversarial set —
+escape=0 is a floor, not evidence of accuracy. chrF≥40 fails on 7/10 rows
+(6/8 quality rows) at 3B. RAG glossary retrieval is the dominant quality
+factor where an applicable glossary exists (81.66→38.16 off); no measurable
+effect where none applies.
 
-### Not blocking, but unresolved
+## Conditions
 
-- OCR CER/WER: unvalidated (datasets inaccessible — see NOT_VALIDATED.md).
-- TCM-specific model comparison column: not produced (no 7B runtime here).
-- HalluEntity-based detector calibration: not performed.
+### P0 — blocks deployment on dosage-bearing text
 
-**Bottom line:** the safety mechanism (G5) is supported by the numbers in this
-run; translation quality is conditional on a larger model and the fixes above.
-The system is approved as a *corpus-intake tool with mandatory human review*,
-not as an autonomous translator.
+1. **G6 (dosage preservation) fails zero-tolerance** on glossary-adherence
+   (80%) and usda-dosage (87.5%). Do not deploy on dosage-bearing text until
+   G6 pass rate = 1.0 or a fail-closed behavior (reject any segment with a
+   missing/altered numeric token) is implemented. The EC100→EC150 /
+   IC100→IC150 value-corruption pattern must be eliminated specifically.
+2. **G2 empty/copy outputs at 42% on usda-dosage** (20/48) and 1/3 on
+   classical-zh. The 3B model produces empty output on the classical stage
+   and verbatim copies on en→en probes. The pipeline must fail closed on
+   empty output, or the model must be upgraded, before any dosage-bearing or
+   classical text is processed.
+
+### P1 — required before claiming validated translation behavior
+
+3. **G5 precision fixes:** the species regex false-positives sentence
+   boundaries and news entities (precision 0% on NTREX news, 40% on the
+   adversarial set; it even blocked 2 correct chemical renderings). A
+   dictionary-attested-genus filter or two-token NER is required before
+   deployment on non-biology text. Until then G5 is a species-name guardrail
+   requiring an in-domain source.
+4. **Human-review validation:** not performed in v2 or v3. A scored review
+   session (adequacy/fluency, acceptance rate, edit distance) is required.
+
+### P2 — characterization gaps
+
+5. **Non-Qwen model run required** to characterize model-family variance;
+   all current numbers come from a single 3B checkpoint. A 7B-class model
+   (Qwen2.5-7B-Instruct or ShizhenGPT-7B) run is also required to test
+   whether the chrF<40 and G2/G6 failures are model-size artifacts.
+6. **Larger classical-zh gold set** (Gare is n=3 with inferred parallelism).
+
+## Not blocking, unresolved
+
+- OCR CER/WER: unvalidated (datasets inaccessible — NOT_VALIDATED.md).
+- G5 entity-level hallucination detection: not attempted (the guardrail missed
+  real entity hallucinations it was not designed to see).
+- MeSpEn inverted-row defects: the glossary-adherence set inherits them.
+
+**Bottom line:** the escape-rate safety property is supported; two
+safety-threshold failures (G2, G6) block deployment on dosage-bearing text.
+Approved as a corpus-intake tool with mandatory human review and the P0
+remediations above; not approved as an autonomous translator.
