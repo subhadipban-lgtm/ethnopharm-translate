@@ -1,4 +1,4 @@
-# tmtrans — validated traditional-medicine translation workbench
+# Ethnopharm_trans —validated traditional-medicine translation workbench
 
 Local-server program for translating traditional medicine literature (TCM,
 Ayurveda, and Southeast Asian ethnopharmacology) into English with **proper
