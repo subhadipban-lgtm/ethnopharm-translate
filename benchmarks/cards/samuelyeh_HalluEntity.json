@@ -1,0 +1,14 @@
+{
+  "dataset_id": "samuelyeh/HalluEntity",
+  "license_hf_api_tag": "license:mit",
+  "license_hf_cardData": "mit",
+  "gated": false,
+  "private": false,
+  "downloads_at_audit": 86,
+  "last_modified": "2025-04-24T18:21:34.000Z",
+  "tasks_supported": [
+    "G5 detector sanity check (not species-specific)"
+  ],
+  "format_notes": "Not executed in this run (entity-level benchmark needs a detector calibration protocol); planned for v3.",
+  "used_for": "NOT USED in runs — listed as future calibration resource only"
+}

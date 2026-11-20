@@ -1,0 +1,14 @@
+{
+  "dataset_id": "snskrt/Sanskrit-OCR-Parallel-Corpus",
+  "license_hf_api_tag": null,
+  "license_hf_cardData": null,
+  "gated": null,
+  "private": null,
+  "downloads_at_audit": null,
+  "last_modified": null,
+  "tasks_supported": [
+    "(would support OCR CER/WER)"
+  ],
+  "format_notes": "HF API returns 401 Unauthorized — license unverifiable. EXCLUDED from use.",
+  "used_for": "EXCLUDED — access blocked (see NOT_VALIDATED.md)"
+}

@@ -1,0 +1,15 @@
+{
+  "dataset_id": "wirthal1990-tech/USDA-Phytochemical-Database-JSON",
+  "license_hf_api_tag": "license:cc-by-4.0",
+  "license_hf_cardData": "cc-by-4.0",
+  "gated": false,
+  "private": false,
+  "downloads_at_audit": 295,
+  "last_modified": "2026-07-28T12:41:37.000Z",
+  "tasks_supported": [
+    "dosage/number preservation probes (Gate G6)",
+    "accepted-species registry seed (Gate G5)"
+  ],
+  "format_notes": "ONLY the 400-row free sample (ethno_sample_400.json) is used. 400 rows have plant_species; 48 have a dosage field. The full 76,907-row registry is commercial and was NOT used.",
+  "used_for": "usda-dosage category (Part C), species registry for G5 accounting"
+}

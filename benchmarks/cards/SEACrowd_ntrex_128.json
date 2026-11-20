@@ -1,0 +1,14 @@
+{
+  "dataset_id": "SEACrowd/ntrex_128",
+  "license_hf_api_tag": "license:cc-by-sa-4.0",
+  "license_hf_cardData": "cc-by-sa-4.0",
+  "gated": false,
+  "private": false,
+  "downloads_at_audit": 95,
+  "last_modified": "2024-06-24T13:23:01.000Z",
+  "tasks_supported": [
+    "general-domain MT fluency floor for en->th / en->lo / en->km"
+  ],
+  "format_notes": "Script dataset (ntrex_128.py); data at MicrosoftTranslator/NTREX raw GitHub. newstest2019-src.eng.txt + newstest2019-ref.{tha,lao,khm}.txt, line-aligned, 1,997 sentences per language. News domain only.",
+  "used_for": "ntrex-128 en->th/lo/km rows (Part C). NOT evidence of ethnobotanical quality."
+}
