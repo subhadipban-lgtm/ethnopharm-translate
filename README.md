@@ -101,6 +101,67 @@ docker compose up --build
 # workbench on http://localhost:8765; edit docker-compose.yml for vLLM vs Ollama
 ```
 
+## OCR: manuscript scans → text
+
+For woodblock classical Chinese, Devanagari palm leaves, Thai Samut Khoi
+folding books, and printed pharmacopoeias, tmtrans adds an OCR front-end with
+the same pluggable-backend design: any vision-language model behind an
+OpenAI-compatible endpoint (vLLM), plus an offline mock for dry-runs.
+
+```
+scans/ (png/jpg/tiff…)
+   │  natural page ordering
+   ▼
+[optional] surya line detection → line crops
+   (keeps Thai Sara / Devanagari matras sharp on palm-leaf folios)
+   │
+   ▼
+VLM transcription (script-aware prompts; vertical RTL columns for woodblock,
+IAST output option for Sanskrit/Pali)
+   │
+   ▼
+OCR JSONL  ←──── staging boundary: OCR finishes and exits,
+   │              then the translation model takes the full VRAM
+   ▼
+tmtrans translate pages.jsonl --lang lzh   (or --translate to chain)
+```
+
+```bash
+# Serve a vision model with vLLM (24GB GPU: fits in ~16GB BF16):
+vllm serve Qwen/Qwen2.5-VL-7B-Instruct --max-model-len 16384
+
+export TMTRANS_OCR_MODEL=Qwen/Qwen2.5-VL-7B-Instruct
+export TMTRANS_OCR_BASE_URL=http://localhost:8000/v1   # defaults to TMTRANS_BASE_URL
+
+tmtrans ocr scans/ --lang lzh --reading-order rtl-columns          # OCR → JSONL
+tmtrans ocr scans/ --lang sa --iast                                # Sanskrit → IAST
+tmtrans ocr palmleaf/ --lang th --line-segmentation surya --translate
+```
+
+Or from the workbench: **OCR scans** tab → folder path, language, reading
+order → runs as one background job (status `ocr` → `running`), page numbers
+preserved on every segment as provenance.
+
+### Verified model options (HF, Nov 2026)
+
+| Purpose | Model | Notes |
+|---|---|---|
+| Unified all-script | `Qwen/Qwen2.5-VL-7B-Instruct` / `Qwen/Qwen3-VL-8B-Instruct` | 5–6M downloads; vertical text, multi-script layout |
+| Compact document OCR | `PaddlePaddle/PaddleOCR-VL-1.6` (0.9B), `zai-org/GLM-OCR` | <4GB VRAM; leaves room for the translation LLM on the same GPU |
+| Sanskrit | `diabolic6045/Sanskrit-Qwen2.5-VL-7B-Instruct-OCR`, `MuseMesh/sansar-ocr-2b`, `Piyush3142/trocr-sanskrit-ocr` (trained on `yzk/veda-ocr-ms`) | community fine-tunes — low adoption, validate on your folios before batch runs |
+| Thai | `deepseek-ai/DeepSeek-OCR` (base), `sthaps/DeepSeek-ocr-Thai`, `openthaigpt/thai-trocr` | thai-trocr is Apache-2.0, the most adopted of the three |
+| Sanskrit→EN translation model | `diabolic6045/Sanskrit-qwen-7B-Translate-v2` | same repo family as the Sanskrit OCR checkpoint |
+
+Caveats: `ByteDance/AncientDoc` (sometimes recommended for vertical woodblock
+fine-tuning) could not be found on HF — treat that pointer as stale. The
+script-specific checkpoints above are single-author releases with 18–578
+downloads; pin exact revisions and spot-check a few pages before batch OCR.
+
+Line segmentation (`pip install 'tmtrans[ocr]'` for surya + Pillow) is
+recommended for wide palm-leaf / Samut Khoi folios where full-page inference
+blurs small diacritics; whole-page mode is fine for printed or high-resolution
+scans, and Qwen2.5-VL handles vertical column ordering natively.
+
 ## CLI
 
 ```bash
@@ -175,7 +236,8 @@ keeps the retrieval loop from amplifying its own errors.
 
 ```
 src/tmtrans/
-  segment.py     segmentation with CJK/Indic awareness + PDF/HTML/TXT ingestion
+  ocr.py         manuscript OCR: VLM backends, reading order, surya line crops, JSONL
+  segment.py     segmentation with CJK/Indic awareness + PDF/HTML/TXT/OCR-JSONL ingestion
   lang.py        language profiles, classical-stage decisions, IAST folding
   dictionary.py  bilingual terminology store (herbs/formulas/diseases/concepts)
   rag.py         TF-IDF char-ngram translation memory + glossary retrieval

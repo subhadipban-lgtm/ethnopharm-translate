@@ -24,10 +24,13 @@ $$("nav button").forEach(b => b.onclick = () => {
 async function loadHealth() {
   try {
     const h = await api("/api/health");
-    const b = h.backend;
+    const b = h.backend, o = h.ocr || {};
     const state = b.kind === "mock" ? "mock (offline test)" :
       (b.endpoint && b.endpoint.ok ? "connected" : "unreachable — check your vLLM/Ollama server");
-    $("#backend-meta").textContent = `${b.model} · ${b.kind} · ${state} · glossary: ${h.glossary.entries} entries`;
+    const ostate = !o.kind || o.kind === "mock" ? "mock" :
+      (o.endpoint && o.endpoint.ok ? "connected" : "unreachable");
+    $("#backend-meta").textContent =
+      `${b.model} · ${state} | OCR: ${o.model || "n/a"} · ${ostate} | glossary: ${h.glossary.entries} entries`;
   } catch (e) { $("#backend-meta").textContent = "server error"; }
 }
 
@@ -145,6 +148,26 @@ $("#gl-search").onclick = async () => {
      <div class="small muted">${e.entry_id} · ${e.category} · ${e.tradition || ""} ${e.pharmacopoeia || ""}
      ${e.variants && e.variants.length ? " · variants: " + esc(e.variants.join(", ")) : ""}</div></div>`).join("")
     : '<p class="muted">No match.</p>';
+};
+
+$("#ocr-submit").onclick = async () => {
+  const folder = $("#ocr-folder").value.trim();
+  if (!folder) return toast("Enter the scans folder path on the server");
+  const body = {
+    folder,
+    title: $("#ocr-title").value || null,
+    source_lang: $("#ocr-lang").value,
+    variant: $("#ocr-variant").value || null,
+    reading_order: $("#ocr-order").value,
+    iast: $("#ocr-iast").checked,
+    line_segmentation: $("#ocr-lineseg").value,
+  };
+  try {
+    const r = await api("/api/ocr", {method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(body)});
+    toast(`OCR job started (doc ${r.document_id}) — watch progress in Documents`);
+    $$("nav button")[0].click();
+  } catch (e) { toast("OCR failed: " + e.message); }
 };
 
 async function loadCandidates() {

@@ -74,6 +74,45 @@ def cmd_translate(args) -> None:
     print("Review needs_review/failed segments in the web UI (tmtrans serve) before final export.")
 
 
+def cmd_ocr(args) -> None:
+    from pathlib import Path as _Path
+
+    from .ocr import (
+        OCRBackendConfig,
+        get_ocr_backend,
+        ocr_folder,
+        write_jsonl,
+    )
+    from .segment import ingest_file
+
+    ocr_cfg = OCRBackendConfig.from_env(
+        fallback_base_url="", fallback_api_key=""
+    )
+    # fall back to the translation endpoint vars when no OCR-specific ones set
+    import os
+
+    if not ocr_cfg.base_url:
+        ocr_cfg.base_url = os.environ.get("TMTRANS_BASE_URL", "")
+    backend = get_ocr_backend(ocr_cfg)
+    out = _Path(args.out) if args.out else _Path("outputs") / f"ocr-{int(time.time())}.jsonl"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    pages = ocr_folder(
+        args.input, args.lang, backend,
+        reading_order=args.reading_order, iast=args.iast,
+        line_segmentation=args.line_segmentation,
+        progress=lambda i, n, name: print(f"  [{i}/{n}] {name}"),
+    )
+    write_jsonl(pages, out, args.lang, args.reading_order, args.iast)
+    print(f"OCR complete: {len(pages)} pages -> {out}")
+    if not args.translate:
+        print(f"Next: tmtrans translate {out} --lang {args.lang}"
+              + (f" --variant {args.variant}" if args.variant else ""))
+        return
+    # Chain straight into translation (sequential staging on one GPU).
+    args.input, args.out = str(out), str(out.parent)
+    cmd_translate(args)
+
+
 def cmd_export(args) -> None:
     store = Store(args.db)
     out = Path(args.out or f"outputs/{args.doc_id}.{args.fmt}")
@@ -143,6 +182,19 @@ def build_parser() -> argparse.ArgumentParser:
     t.add_argument("--variant", default=None, choices=["classical", "modern"])
     t.add_argument("--out", default="outputs")
     t.set_defaults(func=cmd_translate)
+
+    o = sub.add_parser("ocr", help="OCR a folder of manuscript scans to JSONL (then translate)")
+    o.add_argument("input", help="folder of images (.png/.jpg/.tif/...)")
+    o.add_argument("--lang", default="lzh")
+    o.add_argument("--variant", default=None, choices=["classical", "modern"])
+    o.add_argument("--reading-order", default="auto", choices=["auto", "rtl-columns", "ltr-lines"])
+    o.add_argument("--iast", action="store_true", help="emit IAST transliteration (Sanskrit)")
+    o.add_argument("--line-segmentation", default="none", choices=["none", "surya"],
+                   help="crop lines first via surya (palm leaf / Samut Khoi)")
+    o.add_argument("--out", default=None, help="JSONL path (default outputs/ocr-<ts>.jsonl)")
+    o.add_argument("--translate", action="store_true",
+                   help="continue straight into translation after OCR")
+    o.set_defaults(func=cmd_ocr)
 
     e = sub.add_parser("export", help="export a document from the database")
     e.add_argument("doc_id")

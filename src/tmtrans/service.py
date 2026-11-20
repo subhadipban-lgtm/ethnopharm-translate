@@ -11,6 +11,13 @@ from .backend import BackendConfig, get_backend
 from .db import Store
 from .dictionary import Glossary
 from .export import document_record
+from .ocr import (
+    OCRBackendConfig,
+    discover_images,
+    get_ocr_backend,
+    ocr_folder,
+    segments_from_jsonl,
+)
 from .rag import TranslationMemoryIndex
 from .segment import Segment, ingest_file, segment_text
 from .translate import Translator
@@ -22,6 +29,7 @@ class Service:
         db_path: str = "data/tmtrans.db",
         dictionary_paths: list[str] | None = None,
         backend_config: BackendConfig | None = None,
+        ocr_config: OCRBackendConfig | None = None,
         registry_path: str | None = None,
     ) -> None:
         self.store = Store(db_path)
@@ -33,6 +41,11 @@ class Service:
         self._load_memory_from_db()
         self.backend_config = backend_config or BackendConfig.from_env()
         self.backend = get_backend(self.backend_config)
+        self.ocr_config = ocr_config or OCRBackendConfig.from_env(
+            fallback_base_url=self.backend_config.base_url,
+            fallback_api_key=self.backend_config.api_key,
+        )
+        self.ocr_backend = get_ocr_backend(self.ocr_config)
         self.registry = self._load_registry(registry_path) if registry_path else None
         self._jobs: dict[str, threading.Thread] = {}
         self._lock = threading.Lock()
@@ -83,6 +96,59 @@ class Service:
         with self._lock:
             self._jobs[doc_id] = thread
         thread.start()
+
+    def submit_ocr_folder(
+        self,
+        folder: str,
+        source_lang: str,
+        variant: str | None = None,
+        tradition: str | None = None,
+        title: str | None = None,
+        reading_order: str = "auto",
+        iast: bool = False,
+        line_segmentation: str = "none",
+    ) -> str:
+        """OCR a folder of manuscript scans, then translate. Runs as one
+        background job: status 'ocr' while recognising, then 'running'."""
+        from .ocr import READING_ORDERS
+
+        if reading_order not in READING_ORDERS:
+            raise ValueError(f"reading_order must be one of {READING_ORDERS}")
+        discover_images(folder)  # fail fast on bad paths / empty folders
+        doc_id = self.store.create_document(
+            title or Path(folder).name, source_lang, variant, tradition, source_file=folder
+        )
+        thread = threading.Thread(
+            target=self._run_ocr_job,
+            args=(doc_id, folder, source_lang, variant, reading_order, iast, line_segmentation),
+            daemon=True,
+        )
+        with self._lock:
+            self._jobs[doc_id] = thread
+        thread.start()
+        return doc_id
+
+    def _run_ocr_job(
+        self, doc_id: str, folder: str, source_lang: str, variant: str | None,
+        reading_order: str, iast: bool, line_segmentation: str,
+    ) -> None:
+        self.store.update_document_progress(doc_id, 0, 0, "ocr")
+        try:
+            pages = ocr_folder(
+                folder, source_lang, self.ocr_backend,
+                reading_order=reading_order, iast=iast,
+                line_segmentation=line_segmentation,
+            )
+            segments: list[Segment] = []
+            for p in pages:
+                for seg in segment_text(p.text, page=p.page):
+                    seg.index = len(segments)
+                    segments.append(seg)
+        except Exception:
+            traceback.print_exc()
+            self.store.update_document_progress(doc_id, 0, 0, "error")
+            return
+        self._run_job(doc_id, segments, source_lang, variant)
 
     def _run_job(self, doc_id: str, segments: list[Segment], source_lang: str, variant: str | None) -> None:
         self.store.update_document_progress(doc_id, 0, len(segments), "running")

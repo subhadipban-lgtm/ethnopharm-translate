@@ -38,7 +38,7 @@
   .b-approved { background:#12351c; color:var(--green); }
   .b-needs_review { background:#3a2f10; color:var(--amber); }
   .b-failed { background:#3d1414; color:var(--red); }
-  .b-running,.b-pending { background:#16283a; color:var(--accent); }
+  .b-running,.b-pending,.b-ocr { background:#16283a; color:var(--accent); }
   .b-completed { background:#12351c; color:var(--green); }
   .b-error { background:#3d1414; color:var(--red); }
   .seg { border:1px solid var(--line); border-radius:8px; margin-bottom:12px;
@@ -72,6 +72,7 @@
 <nav>
   <button data-view="documents" class="active">Documents</button>
   <button data-view="new">New translation</button>
+  <button data-view="ocr">OCR scans</button>
   <button data-view="review">Review queue</button>
   <button data-view="glossary">Glossary</button>
   <button data-view="candidates">Term candidates</button>
@@ -123,6 +124,47 @@
         <div><label>Variant</label><input id="nf-variant" placeholder="auto"></div>
       </div>
       <button class="primary" id="nf-submit">Upload &amp; translate</button>
+    </div>
+  </section>
+
+  <section id="view-ocr" class="view">
+    <div class="card">
+      <h3>OCR a folder of manuscript scans</h3>
+      <p class="small muted">Woodblock Chinese, Devanagari palm leaves, Thai Samut Khoi, printed
+      pharmacopoeias. Runs OCR via your vision endpoint, then translation in one job — pages are
+      kept as provenance on every segment. Line-crop mode (surya) keeps small diacritics sharp on
+      palm-leaf / folding-book scans.</p>
+      <label>Folder of images (on the server machine)</label>
+      <input id="ocr-folder" placeholder="/data/scans/samut_khoi_vol3/">
+      <div class="row">
+        <div><label>Source language</label>
+          <select id="ocr-lang">
+            <option value="lzh">Classical Chinese</option><option value="zh">Chinese (modern)</option>
+            <option value="sa">Sanskrit</option><option value="pi">Pali</option>
+            <option value="hi">Hindi</option><option value="ta">Tamil</option>
+            <option value="th">Thai</option><option value="km">Khmer</option>
+            <option value="lo">Lao</option><option value="my">Burmese</option>
+            <option value="vi">Vietnamese</option><option value="id">Indonesian</option>
+            <option value="ms">Malay</option><option value="tl">Tagalog</option>
+          </select></div>
+        <div><label>Variant</label>
+          <select id="ocr-variant"><option value="">auto</option>
+            <option value="classical">classical</option><option value="modern">modern</option></select></div>
+        <div><label>Reading order</label>
+          <select id="ocr-order"><option value="auto">auto</option>
+            <option value="rtl-columns">vertical, right-to-left (woodblock)</option>
+            <option value="ltr-lines">horizontal lines</option></select></div>
+      </div>
+      <div class="row">
+        <div><label>Line segmentation</label>
+          <select id="ocr-lineseg"><option value="none">whole page</option>
+            <option value="surya">surya line crops (palm leaf / Samut Khoi)</option></select></div>
+        <div><label>Title</label><input id="ocr-title" placeholder="Samut Khoi vol. 3"></div>
+      </div>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:12px">
+        <input type="checkbox" id="ocr-iast" style="width:auto">
+        <span>Emit IAST transliteration (Sanskrit/Pali)</span></label>
+      <button class="primary" id="ocr-submit">OCR &amp; translate</button>
     </div>
   </section>
 

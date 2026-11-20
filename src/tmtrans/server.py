@@ -29,6 +29,17 @@ class TextSubmission(BaseModel):
     tradition: str | None = None
 
 
+class OCRSubmission(BaseModel):
+    folder: str
+    title: str | None = None
+    source_lang: str = "lzh"
+    variant: str | None = "classical"
+    tradition: str | None = None
+    reading_order: str = "auto"
+    iast: bool = False
+    line_segmentation: str = "none"
+
+
 class ReviewSubmission(BaseModel):
     translation: str
     reviewer: str = "local"
@@ -68,11 +79,15 @@ def create_app(service: Service | None = None, dictionary_paths: list[str] | Non
     @app.get("/api/health")
     def health() -> dict:
         from .backend import OpenAICompatBackend
+        from .ocr import MockOCRBackend, VLMOCRBackend
 
         backend = {"kind": svc.backend_config.kind, "model": svc.backend_config.model}
         if isinstance(svc.backend, OpenAICompatBackend):
             backend["endpoint"] = svc.backend.health()
-        return {"version": __version__, "backend": backend, "glossary": svc.glossary.stats()}
+        ocr = {"kind": svc.ocr_config.kind, "model": svc.ocr_config.model}
+        if isinstance(svc.ocr_backend, VLMOCRBackend):
+            ocr["endpoint"] = svc.ocr_backend.health()
+        return {"version": __version__, "backend": backend, "ocr": ocr, "glossary": svc.glossary.stats()}
 
     @app.get("/api/languages")
     def languages() -> dict:
@@ -101,6 +116,23 @@ def create_app(service: Service | None = None, dictionary_paths: list[str] | Non
             tmp.write(await file.read())
             tmp_path = tmp.name
         doc_id = svc.submit_file(tmp_path, title or file.filename, source_lang, variant, tradition)
+        return {"document_id": doc_id}
+
+    @app.post("/api/ocr")
+    def submit_ocr(sub: OCRSubmission) -> dict:
+        from pathlib import Path as _Path
+
+        if not _Path(sub.folder).is_dir():
+            raise HTTPException(400, f"not a directory: {sub.folder}")
+        try:
+            doc_id = svc.submit_ocr_folder(
+                sub.folder, sub.source_lang, sub.variant, sub.tradition, sub.title,
+                sub.reading_order, sub.iast, sub.line_segmentation,
+            )
+        except ValueError as exc:
+            raise HTTPException(400, str(exc))
+        except Exception as exc:
+            raise HTTPException(400, f"OCR submission failed: {exc}")
         return {"document_id": doc_id}
 
     @app.get("/api/documents/{doc_id}")
