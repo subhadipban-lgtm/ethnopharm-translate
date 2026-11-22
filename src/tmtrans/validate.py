@@ -7,7 +7,8 @@ Gates (no LLM-in-the-loop judgement here — validation must be reproducible):
   G4 untranslated  — residual source script in the output (untranslated spans)
   G5 hallucination — binomials not attested in the glossary or a validator-
                      supplied registry are rejected
-  G6 numbers       — digits/dosages in the source are preserved
+  G6 numbers       — digits/dosages in the source are preserved (severity=error:
+                    fail-closed; a dropped numeric token blocks auto_pass)
   G7 length        — output/source length ratio within plausible bounds
 
 Segment status after gates: auto_pass | needs_review | failed.
@@ -164,12 +165,14 @@ def validate_segment(
                    "unattested binomials: " + "; ".join(sorted(set(hallucinated))[:6]) if hallucinated else "")
     )
 
-    # G6 numbers preserved
+    # G6 numbers preserved. severity=error: a dropped or altered dosage/number
+    # token is a safety-relevant failure for dosage-bearing text, so the
+    # segment must not reach auto_pass. Fail-closed.
     src_nums = re.findall(r"\d+(?:\.\d+)?", source_text)
     tgt_nums = set(re.findall(r"\d+(?:\.\d+)?", translation))
     lost = [n for n in src_nums if n not in tgt_nums]
     report.results.append(
-        GateResult("numbers", not lost, "warning",
+        GateResult("numbers", not lost, "error",
                    "source numbers missing in translation: " + ", ".join(lost[:8]) if lost else "")
     )
 
