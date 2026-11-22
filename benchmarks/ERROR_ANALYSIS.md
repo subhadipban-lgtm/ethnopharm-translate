@@ -165,15 +165,22 @@ reference strings). The gate blocks right answers on chemical nomenclature.
 
 ### Adversarial-set FP composition (Part J)
 
-Of the 6 adversarial FPs (hallucination-check set): all 6 are boundary flags
-on non-hallucination content — none are wrong-span flags on designed
-hallucination segments, none are flags on undesigned hallucinations.
+Of the 6 adversarial FPs (hallucination-check set): 4 are boundary flags on
+non-hallucination content (Danshen two, Three grams, Some herbal, Please
+provide) and 2 are correct species/vernacular renderings outside the registry
+(Sweet wormwood = Artemisia annua; Coptis rhizome = 黄连). None are wrong-span
+flags on designed-hallucination segments; none are flags on undesigned
+hallucinations. (Corrected in v3.2 — v3.1 misclassified all six as boundary.)
+The two NTREX non-species hallucinations (Khmu people; Ellos que) are recorded
+as `non_species_hallucination_blocked` in g5_precision.csv — G5 fired on the
+hallucinated spans themselves, for the wrong reason (capitalized multi-token
+phrases absent from the registry).
 
 | segment_id | detected span | fp_class |
 |---|---|---|
 | hallucination-check:1 | Danshen two | boundary (vernacular name + quantity word) |
-| hallucination-check:4 | Sweet wormwood | boundary (correct vernacular translation) |
-| hallucination-check:6 | Coptis rhizome | boundary (correct genus + common noun) |
+| hallucination-check:4 | Sweet wormwood | correct_rendering_outside_registry (correct vernacular translation of 青蒿) |
+| hallucination-check:6 | Coptis rhizome | correct_rendering_outside_registry (correct genus + common noun for 黄连) |
 | hallucination-check:6 | Three grams | boundary (quantity phrase) |
 | hallucination-check:7 | Some herbal | boundary (sentence-initial phrase) |
 | hallucination-check:8 | Please provide | boundary (sentence-initial phrase) |
@@ -182,7 +189,8 @@ Recall 4/4 refers to the **designed binomials only** (Curcuma fabricata,
 Herba fictitia, Glycyrrhiza imaginaria, Panax fictionalis). In none of the 6
 FP cases was the segment blocked *because of* a designed hallucination while
 G5 flagged a different span — each FP is an independent boundary match on
-non-hallucination content.
+non-hallucination content; 2 of the 6 (Sweet wormwood, Coptis rhizome) are
+correct renderings outside the registry, not boundary matches.
 
 ## 10. G2 failures (empty and copy outputs)
 

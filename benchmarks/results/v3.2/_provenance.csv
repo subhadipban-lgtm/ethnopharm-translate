@@ -1,0 +1,6 @@
+file,field,source,note
+benchmarks/results/v3.2/ablations.csv,"numeric cells (chrf/chrf_ci/bleu/bleu_ci/ter) for glossary-adherence rag_off + binding_off and classical-zh classical_off",benchmarks/results/v2/ablations_raw.json,"Raw ablation-runner output, committed in validation/v2. The v3 CSV export at dfcc615 contained duplicated baseline cells in these rows (export defect) and was NOT used as the source for these cells. Values match the v3.2 brief exactly."
+benchmarks/results/v3.2/ablations.csv,"all other cells",git show validation/v3:benchmarks/results/v3/ablations.csv,"v3 CSV export, unchanged except interpretation column appended"
+benchmarks/results/v3.2/ablations.csv,"interpretation column",v3.2 brief Part A.2,"exact strings from the v3.2 brief; descriptive only, may not override numeric evidence"
+benchmarks/results/v3.2/summary.csv,"G4_untranslated_pass_rate",git show validation/v3:benchmarks/results/v3/summary.csv,"reverted to v3 values: blank for classical-zh and en->X rows; 0.9333 glossary-adherence; 1.0 hallucination-check, th/lo/km->en, usda-dosage"
+benchmarks/results/v3.2/g5_precision.csv,"fp_class column only",v3.2 brief Part D,"manual_label and rationale unchanged; 4 rows reclassified"

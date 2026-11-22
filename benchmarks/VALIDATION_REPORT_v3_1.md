@@ -12,20 +12,12 @@ Branch: `validation/v3.1` · Date: 2026-11-21 · Base: `validation/v3` (tip `fb5
 
 The v3 report's (a) "G5 missed nothing real" and (b) "escape = 0/63" could not both stand unqualified. Per-segment facts from `benchmarks/results/v2/*_mlx-community_Qwen2.5-3B-Instruct-4bit.jsonl`:
 
-- **ntrex-128-lo-en:7 ("Khmu people")**: source is a Lao sentence about a name-change referendum; the model output "The Khmu people of Laos are involved in the production of soap…" is a wholly hallucinated entity. G5 `generated=2` (`Khmu people`, `Laos are`), `caught=2`, `escaped=0`, segment `status=failed` (BLOCKED). G5 flagged both sentence-boundary spans. **Escape = 0 is a genuine detection outcome on this segment (blocked by boundary flag), not an escape. But the real hallucination (the invented soap claim) is non-binomial — G5 does not catch it.**
-- **ntrex-128-th-en:17 ("Ellos que")**: Thai source about a referendum; model answered in Spanish ("Ellos que tienen derecho a votar…"). G5 `generated=1` (`Ellos que`), `caught=1`, `escaped=0`, segment `status=failed` (BLOCKED). **Escape = 0 is a genuine detection outcome (blocked by boundary flag). But the real failure is a language-switch — non-binomial — which G5 does not catch.**
+- **ntrex-128-lo-en:7 ("Khmu people")**: source is a Lao sentence about a name-change referendum; the model output "The Khmu people of Laos are involved in the production of soap…" is a wholly hallucinated entity. G5 `generated=2` (`Khmu people`, `Laos are`), `caught=2`, `escaped=0`, segment `status=failed` (BLOCKED). **Corrected (v3.2): G5 fired on `Khmu people` — the hallucinated entity itself — and on `Laos are` (a boundary). The segment was blocked because G5 detected the hallucinated span, not because of a boundary false positive. The species-task rubric still classifies the detection as FP (it is not a species name), but the block itself landed on the real hallucination.**
+- **ntrex-128-th-en:17 ("Ellos que")**: Thai source about a referendum; model answered in Spanish ("Ellos que tienen derecho a votar…"). G5 `generated=1` (`Ellos que`), `caught=1`, `escaped=0`, segment `status=failed` (BLOCKED). **Corrected (v3.2): G5 fired on `Ellos que` — the hallucinated Spanish-language output itself. The segment was blocked because G5 detected the hallucinated span, not because of a boundary false positive. The species-task rubric still classifies the detection as FP (not a species name), but the block landed on the real hallucination.**
 
 Added scope statement to this report §A and to METRICS.md:
 
-> "Escape = 0 applies to binomial candidates only. Non-binomial hallucinations
-> (e.g. 'Khmu people', Spanish-language answer to a Thai source) were observed
-> in NTREX. Segment ntrex-128-lo-en:7 containing 'Khmu people' was blocked —
-> because G5 flagged its sentence boundary. Therefore escape = 0 is a side-effect
-> of over-blocking on that segment. Segment ntrex-128-th-en:17 containing
-> 'Ellos que' was blocked — because G5 flagged its sentence boundary. Therefore
-> escape = 0 is a side-effect of over-blocking on that segment. Non-binomial
-> hallucinations in a segment not flagged by the boundary detector would not be
-> caught."
+> On ntrex-128-lo-en:7, G5's detections were ['Khmu people', 'Laos are'] — the first is the hallucinated ethnic-group entity itself, the second is a boundary. The segment was blocked because G5 fired on the hallucinated entity, not because of a boundary false positive. On ntrex-128-th-en:17, G5's only detection was 'Ellos que' — the hallucinated Spanish-language output itself. Both segments were blocked by G5 detecting the hallucinated span, but G5 is a species-name regex and could not identify these spans as non-species hallucinations; they were flagged because they were capitalized multi-token phrases the gate did not find in the registry. The species-task precision of G5 remains 0% on NTREX; the segment-blocking behavior on these two segments happened to block real hallucinations, but it did so for the wrong reason.
 
 METRICS.md one-line definition added:
 
@@ -98,7 +90,7 @@ Join on segment id from the v2 JSONLs:
 
 ## Section J — Adversarial-set FP composition (Part J)
 
-Of the 6 adversarial FPs (hallucination-check set): **all 6 are type (a) boundary flags on non-hallucination content**; 0 type (b) wrong-span, 0 type (c) undesigned hallucination.
+Of the 6 adversarial FPs (hallucination-check set): **4 are boundary flags on non-hallucination content; 2 are correct species/chemical renderings outside the registry** (Sweet wormwood, Coptis rhizome). 0 are wrong-span flags, 0 are flags on undesigned hallucinations. (Corrected in v3.2 — see VALIDATION_REPORT_v3_2.md.)
 
 | segment_id | detected span | fp_class |
 |---|---|---|
@@ -137,14 +129,14 @@ Same sentence added to VALIDATION_REPORT_v3.md §7 (v3 report, unchanged file on
 
 | claim | v3 said | v3.1 says | evidence |
 |---|---|---|---|
-| G5 escape scope | "G5 missed nothing real" unqualified | Escape = 0 is binomial-only; "Khmu people" (ntrex-128-lo-en:7) and "Ellos que" (ntrex-128-th-en:17) were **blocked** by boundary flags; non-binomial hallucination survival out of scope | JSONLs + METRICS.md escape definition |
+| G5 escape scope | "G5 missed nothing real" unqualified | Escape = 0 is binomial-only; "Khmu people" (ntrex-128-lo-en:7) and "Ellos que" (ntrex-128-th-en:17) were **blocked by G5 firing on the hallucinated spans themselves** (not boundary flags); non-binomial hallucination survival out of scope | JSONLs + g5_precision.csv + VALIDATION_REPORT_v3_2.md §3 |
 | "safety floor held" | unqualified phrase | Replaced: "G5 escape rate was 0/63, but at 0% precision on news text the gate operates as a blanket block rather than a detector: it blocked 2 correct chemical renderings and missed the 2 real entity hallucinations it was not designed to see." | RECOMMENDATION.md §Justification |
 | G6 composition | "three genuine value corruptions ... the remainder" | 1 of 6 glossary-adherence genuine; 4 of 6 usda-dosage genuine; attributed per segment | ERROR_ANALYSIS §11 + JSONLs |
 | G6 scope | dosage preservation | numeric-token preservation (angle 180°→185° in scope) | METRICS.md G6 section |
 | byte-identical reproducibility | claimed, not verified | **Verified: 30/30 and 48/48 byte-identical** across run1/run2/v2 baseline | reproducibility.json + per-segment diff |
 | G2 column name | `G2_nonempty_pass_rate` (misnomer) | Renamed `G2_nonempty_noncopy_pass_rate` + `G2_fail_mechanism` | summary.csv header + METRICS.md |
 | G3/G5 overlap | not stated | glossary-adherence 0/3 overlap (independent); hallucination-check 1/1 overlap | JSONL join + this report §I |
-| adversarial FP classification | not stated | all 6 are type (a) boundary flags | g5_precision.csv fp_class + ERROR_ANALYSIS §9 |
+| adversarial FP classification | not stated | 4 boundary + 2 correct_rendering_outside_registry | g5_precision.csv fp_class + ERROR_ANALYSIS §9 |
 | commit SHAs | dfcc615 only | dfcc615 (v3 correction) + fb52ff2 (v3 tip) + new v3.1 commit | git log |
 | single-labeller | NOT_VALIDATED only | added to RECOMMENDATION.md "Not blocking, unresolved" + NOT_VALIDATED item 12 | this report §L |
 | reproduce_v3.sh P0 label | "P0 conditions UNMET" | "P0 VALIDATION EVIDENCE UNMET (model-level G6/G2; deployment approval depends on fail-closed mitigation...)" | reproduce_v3.sh + script_tests.md |

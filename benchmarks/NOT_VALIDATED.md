@@ -112,8 +112,11 @@ session was conducted.
    G5 is **not validated as a general hallucination detector** (NTREX
    precision 0%); it is a species-name guardrail that requires an in-domain
    source. Not validated as an entity-level hallucination detector at all —
-   it missed the real entity hallucinations (e.g. "Khmu people" soap
-   sentence) while flagging their sentence boundaries.
+   on the two NTREX segments containing real non-species hallucinations
+   ("Khmu people", "Ellos que"), G5 fired on the hallucinated spans
+   themselves, which it happened to block, but only because they are
+   capitalized multi-token phrases absent from the registry — not because
+   G5 can classify them as non-species hallucinations.
 2. **Gare parallelism is inferred**, not verified: pairs are derived from
    alternating 古文/现代文 lines in a single `text` column
    (hf_license_audit.json: features=["text"], size=null). n=3 is a pipeline
@@ -137,9 +140,18 @@ session was conducted.
 10. **MeSpEn data defect surfaced:** at least one inverted row (English in the
     zh column). The glossary-adherence set inherits such defects.
 11. **G5 escape = 0 is a binomial-only claim** (defined by the G5 regex);
-    non-binomial hallucination survival is not measured. G5 missed real entity
-    hallucinations (e.g. "Khmu people" soap sentence, Spanish-language answer
-    to a Thai source) while flagging their sentence boundaries.
+    non-binomial hallucination survival is not measured. G5 fired on the
+    hallucinated spans themselves in the two known non-species cases
+    ("Khmu people", "Ellos que") and blocked those segments, but as
+    boundary/capitalized-phrase matches, not as non-species-hallucination
+    classification — the gate cannot distinguish a hallucinated entity from a
+    legitimate capitalized phrase, which is why NTREX precision is 0%.
 12. **G5 precision is single-labeller** across 63 detections; inter-annotator
     agreement not measured. The precision estimate is indicative, not
     definitive; a second-labeller adjudication is recommended before citing.
+13. **G4 (untranslated) vacuous-pass question is open.** G4 was reverted to
+    v3 values in v3.2 (blank on classical-zh and en→X rows; 1.0 on X→en and
+    usda-dosage). Whether G4 on en→X rows is vacuous (e.g. if the gate keys
+    off English-target tokens) has not been evaluated. See
+    `OPEN_QUESTIONS/G4_vacuous_pass.md`.
+

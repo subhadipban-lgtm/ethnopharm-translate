@@ -63,6 +63,8 @@ usda-dosage 48/48), chrF delta 0.00 at n=30 and n=48.
    whether the chrF<40 and G2/G6 failures are model-size artifacts.
 6. **Larger classical-zh gold set** (Gare is n=3 with inferred parallelism).
 
+v3.2 corrects three data-integrity defects in v3.1 (ablations numeric cells, the Part A G5 mechanism statement, G4 values). P0 failures are unchanged and remain unmitigated.
+
 ## Not blocking, unresolved
 
 - OCR CER/WER: unvalidated (datasets inaccessible — NOT_VALIDATED.md).

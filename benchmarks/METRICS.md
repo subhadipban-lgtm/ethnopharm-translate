@@ -171,3 +171,12 @@ chrF absolute deltas between two temperature-0 runs on glossary-adherence
 (n=30) and usda-dosage (n=48), seed 42, plus comparison against the v2
 baselines. The classical-zh delta (0.00) is retained as a footnote only
 (n=3, uninformative for variance). See results/v3/reproducibility.json.
+
+---
+
+# v3.2 additions (2026-11-21, validation/v3.2)
+
+- **ablations.csv numeric cells are frozen from `benchmarks/results/v2/ablations_raw.json`** (the raw runner output). The `interpretation` column is descriptive only and may not override the numeric evidence. The v3 CSV export at `dfcc615` carried duplicated baseline cells in the ablation rows and is not a valid source for those cells.
+- **G5 `fp_class` vocabulary**: `boundary | correct_rendering_outside_registry | non_species_hallucination_blocked | n/a`. The vocabulary is descriptive for report transparency; precision is still computed on `manual_label`, not on `fp_class`.
+- **G4 values are restored to v3** (blank on classical-zh and en→X rows; 1.0 on th/lo/km→en and usda-dosage). The vacuous-pass question on G4 is open — see `OPEN_QUESTIONS/G4_vacuous_pass.md`. v3.1's blanking of the X→en rows and its 0.9333 for classical-zh were undisclosed changes and are reverted.
+- **G2 `copy_output_count` column** is restored (dropped in v3.1 without disclosure).
