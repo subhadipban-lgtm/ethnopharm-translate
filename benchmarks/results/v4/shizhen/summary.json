@@ -1,0 +1,80 @@
+[
+  {
+    "dataset": "classical-zh",
+    "model": "ShizhenGPT-7B-LLM.Q4_K_M",
+    "n_segments": 3,
+    "chrf": 13.95,
+    "chrf_ci": [
+      4.2,
+      100.0
+    ],
+    "bleu": 0.0,
+    "bleu_ci": [
+      0.0,
+      0.0
+    ],
+    "ter": 66.67,
+    "G3_glossary_pass_rate": null,
+    "G4_untranslated_pass_rate": null,
+    "G6_numbers_pass_rate": 1.0,
+    "G7_length_pass_rate": 1.0,
+    "G2_nonempty_pass_rate": 0.6667,
+    "G5_generated": 1,
+    "G5_caught": 1,
+    "G5_escaped": 0,
+    "G5_escape_rate": 0.0,
+    "elapsed_s": 41.0
+  },
+  {
+    "dataset": "glossary-adherence",
+    "model": "ShizhenGPT-7B-LLM.Q4_K_M",
+    "n_segments": 30,
+    "chrf": 78.28,
+    "chrf_ci": [
+      64.91,
+      92.03
+    ],
+    "bleu": 73.79,
+    "bleu_ci": [
+      47.16,
+      91.88
+    ],
+    "ter": 35.14,
+    "G3_glossary_pass_rate": 0.8333,
+    "G4_untranslated_pass_rate": 0.8333,
+    "G6_numbers_pass_rate": 0.9,
+    "G7_length_pass_rate": 1.0,
+    "G2_nonempty_pass_rate": 0.8667,
+    "G5_generated": 2,
+    "G5_caught": 2,
+    "G5_escaped": 0,
+    "G5_escape_rate": 0.0,
+    "elapsed_s": 326.7
+  },
+  {
+    "dataset": "ntrex-128-en-th",
+    "model": "ShizhenGPT-7B-LLM.Q4_K_M",
+    "n_segments": 25,
+    "chrf": 26.5,
+    "chrf_ci": [
+      22.06,
+      31.06
+    ],
+    "bleu": 5.5,
+    "bleu_ci": [
+      1.89,
+      10.66
+    ],
+    "ter": 102.34,
+    "G3_glossary_pass_rate": 1.0,
+    "G4_untranslated_pass_rate": null,
+    "G6_numbers_pass_rate": 1.0,
+    "G7_length_pass_rate": 1.0,
+    "G2_nonempty_pass_rate": 1.0,
+    "G5_generated": 2,
+    "G5_caught": 2,
+    "G5_escaped": 0,
+    "G5_escape_rate": 0.0,
+    "elapsed_s": 423.7
+  }
+]
