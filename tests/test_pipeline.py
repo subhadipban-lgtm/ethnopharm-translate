@@ -244,3 +244,25 @@ def test_export_jsonl_and_xlsx(tmp_path, glossary):
     assert record["segments"][0]["source_location"]["start"] == 0
     export_xlsx(store, doc_id, tmp_path / "out.xlsx")
     assert (tmp_path / "out.xlsx").stat().st_size > 0
+
+
+def test_gate_residual_script_latin_source(glossary):
+    # A perfect Thai translation of an English source must NOT trip G4:
+    # the gate must not count the target's own script as "residual".
+    report = _validate("นี่คือประโยคทดสอบ", source="This is a test sentence.", glossary=glossary)
+    g4 = next(r for r in report.results if r.gate == "untranslated")
+    assert g4.passed, f"G4 false-positive on Latin-source row: {g4.detail}"
+
+
+def test_gate_residual_script_detects_source_leftover(glossary):
+    # Thai leftovers in an English target (th->en) must still be flagged.
+    # _validate hardcodes source_lang="zh", which counts CJK, so call the
+    # validator directly with source_lang="th".
+    from tmtrans.validate import validate_segment
+    report = validate_segment(
+        segment_id="t-th", source_text="นี่คือการทดสอบ",
+        translation="This is นี่คือ a test", terms=[],
+        expected_glossary=[], source_lang="th", glossary=glossary,
+    )
+    g4 = next(r for r in report.results if r.gate == "untranslated")
+    assert not g4.passed

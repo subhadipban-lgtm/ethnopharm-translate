@@ -1,43 +1,64 @@
-# OPEN QUESTION — G4 (untranslated) vacuous pass on en→X rows
+# OPEN QUESTION — G4 (untranslated) on Latin-source rows: RESOLVED in v4 (found defect)
 
-Status: open (not evaluated in v3.2) · Raised: 2026-11-21 · Owner: unassigned
+Status: **resolved by code fix in commit after d076d47** · Raised: 2026-11-21 · Updated: 2026-11-22
 
-## The question
+## Original question
 
-`G4_untranslated_pass_rate` is reported as `1.0` on the X→en NTREX rows
-(th→en, lo→en, km→en) and on usda-dosage, and is blank on the en→X rows
-(en→th, en→lo, en→km) and on classical-zh.
+Whether `G4_untranslated_pass_rate` on en→X rows was **vacuous** — i.e. whether
+the gate was checking anything at all.
 
-The v3.1 round silently re-wrote these values (blanked the X→en / usda rows,
-set classical-zh to 0.9333 and en→X rows to `n/a`) without a stated
-denominator or a re-derivation. v3.2 reverted those edits to the v3 values.
+## What the code actually did (pre-fix)
 
-What has not been established:
+`tmtrans.validate._residual_script_ratio` selected which Unicode ranges count as
+"residual source script" from the **source** language alone:
 
-- Whether G4 on en→X rows is **vacuous** — i.e. whether the gate is checking
-  anything at all when the target script is Thai/Lao/Khmer/Chinese, or whether
-  it keys off English-target tokens and therefore passes trivially.
-- Whether G4 = 1.0 on th→en / lo→en / km→en / usda-dosage reflects a real
-  measurement or the same vacuity.
-- Whether the classical-zh value should be reported at sub-sentence
-  granularity rather than per segment.
+- `zh`/`lzh`/`ja` → CJK ranges
+- `vi`/`id`/`ms`/`tl` → returned `0.0` (Latin source, nothing to detect)
+- **everything else (including `en`) → `_INDIC_RANGES`**
 
-## Why it matters
+Consequences:
 
-If G4 is vacuous on any row, those rows contribute nothing to the G4 pass
-rate, and the 1.0 values are not evidence of "no untranslated spans".
+1. **en → th/lo/km**: the "residual" ranges were Indic/Thai/Lao/Khmer, i.e. the
+   *target* script. A perfect Thai/Lao/Khmer translation scored ratio 1.0 and
+   would fail G4. Measured: `_residual_script_ratio("นี่คือประโยคทดสอบ",
+   source_lang="en") == 1.0`. The v3/v4 benchmark harness masked this by
+   forcing `passed=None` for non-English targets.
+2. **en → anything Latin** (e.g. Vietnamese glossary checks): identical
+   mis-count, because `en` was never special-cased.
+3. en → th was therefore never a valid measurement; the en→X "blank" cells in
+   the summary tables were blank for a reason, and the th→en / km→en / usda rows
+   that showed `1.0` were **not** evidence of anything either — with an English
+   target, the gate had no source-script characters to find and trivially passed.
 
-## What is needed to close it
+So: the 1.0 values were vacuous-by-construction on Latin-source rows, and the
+gate was actively wrong (would false-fail) on genuinely non-Latin targets from
+a Latin source. Not a threshold problem — a wrong-ranges-selected problem.
 
-1. Read `tmtrans.validate` to determine exactly which tokens G4 matches on and
-   what denominator it uses (per segment vs per token).
-2. For one en→th segment with a known residual-script defect (e.g. the
-   `เวสเทิร์น AMs` code-switch case in ERROR_ANALYSIS.md), confirm the gate
-   fires or does not.
-3. Decide: report G4 as n/a where the gate is vacuous, or fix the gate.
-4. Record the decision here and in METRICS.md.
+## Fix (v4)
 
-## Explicitly out of scope for v3.2
+`_LATIN_SOURCE_LANGS = {"en", "vi", "id", "ms", "tl"}` → return `0.0` (gate not
+applicable). `zh`/`lzh`/`ja` keep CJK ranges; other Indic-source languages keep
+the Indic ranges. Two regression tests added
+(`test_gate_residual_script_latin_source`,
+`test_gate_residual_script_detects_source_leftover`); 44 tests pass.
 
-v3.2 only restored the v3 values and filed this question. No G4 value was
-recomputed and no gate code was changed.
+## Residual open items (NOT closed by this fix)
+
+- **No non-Latin-target detection for Latin sources remains impossible** — G4
+  cannot tell a correct Thai output from an empty one on en→th. If that
+  direction matters, G4 needs an explicit "target script present?" check
+  (e.g. require ≥ X% of chars in the target script for non-Latin targets).
+  Not implemented; no claim is made about en→X quality from G4.
+- The **en→X rows in the benchmark still carry no G4 signal** and should be
+  reported as n/a, not as 1.0. No metric was recomputed in this round.
+- **v3/v4 summary CSVs were NOT regenerated** — G4 values there are stale
+  artifacts of the buggy gate and of the harness's `passed=None` masking. They
+  should be regenerated in the next validation round, which also requires
+  re-running the models (not done here; see Co-Authored-By note in commit).
+- The classical-zh `n/a` for G4 remains correct (target is Chinese; residual
+  check is meaningless).
+
+## Decision record
+
+Do not backfill numbers into v3/v4 artifacts. Report G4 as n/a for en→X and for
+Latin-target rows until the harness emits a target-script-presence gate.

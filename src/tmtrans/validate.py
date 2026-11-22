@@ -92,12 +92,18 @@ _INDIC_RANGES = (
 )
 
 
+# Latin-script sources: with no source-script characters to detect in the
+# target, the residual-script ratio is undefined (would count the target's own
+# non-Latin script as "residual"). Applies to en as well as vi/id/ms/tl.
+_LATIN_SOURCE_LANGS = {"en", "vi", "id", "ms", "tl"}
+
+
 def _residual_script_ratio(text: str, source_lang: str) -> float:
     if not text:
         return 0.0
+    if source_lang in _LATIN_SOURCE_LANGS:
+        return 0.0
     ranges = _CJK_RANGES if source_lang in ("zh", "lzh", "ja") else _INDIC_RANGES
-    if source_lang in ("vi", "id", "ms", "tl"):
-        return 0.0  # Latin-script sources can't be detected this way
     count = sum(1 for c in text if any(lo <= c <= hi for lo, hi in ranges))
     return count / max(1, len(text))
 
