@@ -1,0 +1,18 @@
+[
+  {
+    "direction": "eng_Latn->tha_Thai",
+    "n": 1012,
+    "chrf_pp": 28.92,
+    "bleu_13a": 3.65,
+    "ter": 133.56,
+    "model": "ShizhenGPT-7B-LLM.Q4_K_M"
+  },
+  {
+    "direction": "eng_Latn->zho_Hans",
+    "n": 1012,
+    "chrf_pp": 24.14,
+    "bleu_13a": 2.78,
+    "ter": 114.31,
+    "model": "ShizhenGPT-7B-LLM.Q4_K_M"
+  }
+]

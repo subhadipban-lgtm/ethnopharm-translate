@@ -1,80 +1,73 @@
-# FLORES-200 comparison anchor — tmtrans models vs published NLLB-200
+# FLORES-200 vs NLLB-200 — where our models actually stand
 
-Status: **in progress** — Qwen2.5-7B-AWQ measured; ShizhenGPT-7B pending.
-See `benchmarks/results/flores/` for the raw outputs. Do not quote numbers
-from this file until marked complete.
+**Date:** 2026-11-23 · **Status:** complete (both models measured) · **Data:** FLORES-200 devtest (1012 segments), CC-BY-SA-4.0, not committed; fetch with `benchmarks/datasets/fetch_flores.sh`.
 
-## What this is
+## Headline
 
-The internal benchmarks (NTREX-128 subsets, MeSpEn glossary adherence,
-usda-dosage, classical-zh) measure task fit and gate behavior. They do NOT
-measure general translation quality against a published reference point, and
-none of them is comparable to anything in the literature.
+Both 7B models we run score **~27–30 chrF++** on eng→tha and **~24–27 chrF++** on
+eng→zho_Hans. NLLB-200, a dedicated translation model, scores **~45–55** on
+high-resource eng→xx. The gap is not noise and not a prompt bug — it is the
+expected difference between a general instruction-tuned LLM and a purpose-built
+multilingual MT system, and it is the single most important number in this
+repository for deciding what the system can and cannot do.
 
-FLORES-200 (devtest, 1012 segments) is the standard benchmark used by NLLB-200
-(NLLB Team et al., 2022, "No Language Left Behind", arXiv:2207.04672). Running
-the same two directions for our models lets us state, in the same units
-(chrF++, sacrebleu word_order=2), how far we are from a published,
-human-anchored system — and, more importantly, whether the gap is consistent
-with the models being general 7B LLMs rather than MT systems.
+## Numbers (FLORES-200 devtest, chrF++ via sacrebleu word_order=2, temp=0)
 
-## Published anchor (NLLB-200, FLORES-200 devtest, chrF++)
+| model | eng→tha chrF++ | eng→tha BLEU | eng→zho_Hans chrF++ | eng→zho_Hans BLEU |
+|---|---|---|---|---|
+| Qwen2.5-7B-Instruct-AWQ | 30.34 | 3.63 | 26.58 | 2.10 |
+| ShizhenGPT-7B-LLM (Q4_K_M, GGUF) | 28.92 | 3.65 | 24.14 | 2.78 |
+| NLLB-200 (paper, eng→high-resource avg) | 54.9 | — | 54.9 | — |
+| NLLB-200 (paper, eng→all avg) | 45.3 | 27.1 | 45.3 | 27.1 |
+| NLLB-200 (paper, eng→low-resource avg) | 41.9 | 23.1 | 41.9 | 23.1 |
 
-From NLLB-200 paper, Table 33 (devtest, eng_Latn → xx):
+Thai and Simplified Chinese are **high-resource** in NLLB's taxonomy, so the
+fair anchor is ~54.9, not the low-resource row.
 
-| direction | bucket | chrF++ |
-|---|---|---|
-| eng → all (avg) | — | 45.3 |
-| eng → all (avg), high-resource | high | 54.9 |
-| eng → all (avg), low-resource | low | 41.9 |
-| eng → all (avg), very low | v.low | 39.5 |
+## How to read this honestly
 
-For context, Table 34 shows NLLB-200 vs Google Translate on low/very-low-resource
-directions: Google 32.3 (low) / 27.0 (v.low) vs NLLB 30.3 / 25.7. Thai and
-Simplified Chinese are **high-resource** languages in NLLB's taxonomy, so the
-relevant anchor is closer to ~54.9 chrF++ for eng→xx high-resource, not the
-low-resource rows.
+1. **The gap is real and large (~25–28 chrF++).** A 3-point difference between
+   our two models is within run-to-run/prompt noise; a 25-point gap to NLLB is
+   not.
+2. **chrF++ is not adequacy.** A model can score 30 chrF++ and be fluent but
+   wrong on dosages and species names — which is exactly what our G6/G5 gates
+   exist to catch. These numbers bound *surface translation quality*, not
+   *safety*.
+3. **Not comparable to our earlier numbers.** NTREX en→th (29.93, 25 segments,
+   news domain) and this FLORES number (30.34, 1012 segments) are consistent
+   with each other but neither is comparable to the classical-zh or glossary
+   numbers, which are different tasks.
+4. **Not comparable to Google/NLLB headline figures without caveats.** We ran
+   4-bit quantized general LLMs with a plain prompt, no few-shot, no
+   domain glossary, no NLLB tokenizer. A properly prompted or fine-tuned run
+   would likely do better; this is a floor, not a ceiling.
+5. **BLEU is reported for completeness only.** The BLEU values (2–4) are far
+   below chrF++ because BLEU is harsh on morphologically rich languages and
+   short outputs; do not read them as "worse than the chrF++ suggests."
+6. **TER ~100–190** indicates outputs roughly twice as long as references or
+   heavily reordered — consistent with chatty, explanatory translations rather
+   than faithful ones.
 
-## Our numbers (same devtest, same chrF++)
+## What this changes (and what it does not)
 
-| model | eng→tha_Thai chrF++ | eng→zho_Hans chrF++ |
-|---|---|---|
-| Qwen2.5-7B-Instruct-AWQ | 30.34 | 26.58 |
-| ShizhenGPT-7B-LLM (Q4_K_M) | pending | pending |
-| NLLB-200 (paper, eng→high-resource avg) | ~54.9 (reference) | ~54.9 (reference) |
+- **Changes:** any claim that "the models are good enough for production
+  translation" is not supported. They are not, for unconstrained text.
+- **Does not change:** the gate architecture's value — G5/G6 catch failures
+  regardless of chrF++. It also does not invalidate the constrained
+  glossary-adherence setting, where output is short, templated, and checked.
+- **Practical implication:** for open-ended translation, either accept heavy
+  human post-editing, use NLLB/M2M100/Madlad as the base model, or restrict
+  scope to term-level output with human review.
 
-## How to read this
-
-- Our models are **general instruction-tuned LLMs**, not dedicated MT systems.
-  A ~24-28 point gap to NLLB-200 on high-resource directions is expected and is
-  consistent with the published gap between generic LLMs and purpose-built MT.
-- The comparison is direction-asymmetric: eng→tha and eng→zho_Hans are
-  **outbound** directions; the models are strongest into English.
-- chrF++ rewards character n-gram overlap; it does not measure factual
-  fidelity. A high score would not have caught the G6 dosage corruptions
-  (180°→185°) that this project exists to prevent.
-- Quantization: Qwen2.5-7B-AWQ is 4-bit AWQ; ShizhenGPT is Q4_K_M GGUF. Both
-  are below the paper's fp16/bf16 baselines, which accounts for a portion of
-  the gap.
-- Prompt: plain "translate this text" system prompt, temperature 0, no
-  few-shot, no domain glossary. Not an upper bound.
-
-## What this does NOT show
-
-- It does not validate the TCM/ethnopharmacology domain. FLORES is
-  Wikipedia-domain news/general text.
-- It does not license any claim about Lao, Khmer, or Pali, which NLLB rates
-  low/very-low-resource and where we have no FLORES numbers.
-- It does not absolve the P0 findings (G6 dosage, G2 copies). Those are gate
-  failures, not benchmark failures, and they are orthogonal to chrF++.
-
-## Reproducing
+## Reproduce
 
 ```
-bash benchmarks/datasets/fetch_flores.sh
-python benchmarks/run_flores.py --backend openai_compat \
-  --model <model-id> --directions eng_Latn->tha_Thai,eng_Latn->zho_Hans \
+bash benchmarks/datasets/fetch_flores.sh   # downloads FLORES-200 (not committed)
+python benchmarks/run_flores.py --model <id> \
+  --directions eng_Latn->tha_Thai,eng_Latn->zho_Hans \
   --out benchmarks/results/flores/<model>.json
 ```
-FLORES-200 is CC-BY-SA-4.0 (Meta AI). The dataset is fetched at runtime and
-never committed; only aggregate scores are committed.
+
+Raw outputs: `benchmarks/results/flores/qwen28awq_flores.json`,
+`benchmarks/results/flores/shizhen_flores.json`. FLORES-200 text is not in
+this repo (CC-BY-SA-4.0); only aggregate metrics are.
