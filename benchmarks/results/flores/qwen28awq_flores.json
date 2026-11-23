@@ -1,0 +1,18 @@
+[
+  {
+    "direction": "eng_Latn->tha_Thai",
+    "n": 1012,
+    "chrf_pp": 30.34,
+    "bleu_13a": 3.63,
+    "ter": 188.78,
+    "model": "Qwen/Qwen2.5-7B-Instruct-AWQ"
+  },
+  {
+    "direction": "eng_Latn->zho_Hans",
+    "n": 1012,
+    "chrf_pp": 26.58,
+    "bleu_13a": 2.1,
+    "ter": 106.67,
+    "model": "Qwen/Qwen2.5-7B-Instruct-AWQ"
+  }
+]
