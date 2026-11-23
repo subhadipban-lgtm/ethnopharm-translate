@@ -2,7 +2,7 @@
 
 This directory holds dataset extracts used by the validation harness
 (`benchmarks/run_v2.py`). License strings below are verbatim from the HF API
-audit (`benchmarks/results/v2/hf_license_audit.json`).
+audit (`benchmarks/results/v2/hf_license_audit.json`; v2 results were removed from the working tree in the 2026-11-23 cleanup — see `benchmarks/results/README.md`).
 
 ## Committed here (with attribution)
 
@@ -18,7 +18,7 @@ audit (`benchmarks/results/v2/hf_license_audit.json`).
 
 | Files | Source | License (verbatim) | Why not committed |
 |---|---|---|---|
-| `ntrex_eng_src.txt`, `ntrex_tha.txt`, `ntrex_lao.txt`, `ntrex_khm.txt` | `MicrosoftTranslator/NTREX` (via SEACrowd/ntrex_128) | `"cc-by-sa-4.0"` | CC BY-SA 4.0 is share-alike/copyleft and is incompatible with committing the data into this Apache-2.0 repository (same reasoning as DFKI-SLT/BotanicalNER, `"gpl-3.0"`, which was dropped entirely). Per-segment **derived outputs** (benchmarks/results/v2/*.jsonl) are the validation evidence and are committed; the source references are fetched at runtime. |
+| `ntrex_eng_src.txt`, `ntrex_tha.txt`, `ntrex_lao.txt`, `ntrex_khm.txt` | `MicrosoftTranslator/NTREX` (via SEACrowd/ntrex_128) | `"cc-by-sa-4.0"` | CC BY-SA 4.0 is share-alike/copyleft and is incompatible with committing the data into this Apache-2.0 repository (same reasoning as DFKI-SLT/BotanicalNER, `"gpl-3.0"`, which was dropped entirely). Per-segment **derived outputs** were the validation evidence (results/v2, since removed from the working tree — see `benchmarks/results/README.md`); the source references are fetched at runtime. |
 
 To reproduce the NTREX runs, `benchmarks/reproduce.sh` downloads these four
 files from `https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/main/NTREX-128/newstest2019-{src.eng,ref.tha,ref.lao,ref.khm}.txt`

@@ -1,10 +1,12 @@
 """Validation v2 runner — real-model and mock runs with G5 accounting.
 
 Produces:
-  benchmarks/results/v2/<dataset>_<backend>.jsonl   per-segment outputs
-  benchmarks/results/v2/summary.csv                 Part C table
-  benchmarks/results/v2/ablations.csv               Part D table
-  benchmarks/results/v2/summary.json                full machine-readable dump
+  benchmarks/results/<run>/<dataset>_<backend>.jsonl   per-segment outputs
+  benchmarks/results/<run>/summary.csv                 Part C table
+  benchmarks/results/<run>/ablations.csv               Part D table
+  benchmarks/results/<run>/summary.json                full machine-readable dump
+  (historically: results/v2 ... removed from tree in the 2026-11-23 cleanup;
+   see benchmarks/results/README.md)
 
 G5 accounting (per dataset):
   G5_generated : binomial candidates in the hypothesis absent from the

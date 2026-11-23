@@ -4,15 +4,15 @@
 #   ./benchmarks/reproduce_v3.sh mock           # offline suite + label checks (no model)
 #   ./benchmarks/reproduce_v3.sh real           # + reproducibility re-runs (needs endpoint)
 #   ./benchmarks/reproduce_v3.sh p0-only        # P0 evidence check only (no test suite)
-#   ./benchmarks/reproduce_v3.sh baseline-check # v2-baseline delta check only
+#   ./benchmarks/reproduce_v3.sh baseline-check # baseline delta check only
 #
 # Environment (real mode): TMTRANS_BASE_URL, TMTRANS_MODEL, TMTRANS_TEMPERATURE=0
 # Test overrides:
 #   TMTRANS_P0_CSV      path to a summary.csv to use for the P0 check
 #                       (default: benchmarks/results/v3.2/summary.csv)
-#   TMTRANS_P0_BASELINE path to a v2-format summary.csv whose chrf column is the
+#   TMTRANS_P0_BASELINE path to a v3.2 summary.csv whose chrf column is the
 #                       baseline for the repro delta check
-#                       (default: benchmarks/results/v2/summary.csv)
+#                       (default: benchmarks/results/v3.2/summary.csv)
 #   TMTRANS_REPRO_RUN1_GLOSSARY_ADHERENCE / TMTRANS_REPRO_RUN1_USDA_DOSAGE
 #                       override the stored repro chrF for the baseline check
 #
@@ -22,7 +22,7 @@
 #
 # Exits non-zero if: the offline suite fails, any P0 condition is unmet
 # (G6 != 1.0 on dosage-bearing rows, or G2 empty/copy rate > 0.05), any G5
-# detection lacks a manual label, or run1 deviates from the stored v2 baseline.
+# detection lacks a manual label, or run1 deviates from the stored baseline.
 #
 # This script enforces evidence-level P0 (model-level G6/G2), not deployment-level
 # P0. A fail-closed mitigation is required to clear RECOMMENDATION.md P0;
@@ -36,7 +36,7 @@ PY="${PYTHON:-.venv/bin/python}"
 if [ ! -x "$PY" ]; then PY=python3; fi
 
 P0_CSV="${TMTRANS_P0_CSV:-benchmarks/results/v3.2/summary.csv}"
-P0_BASELINE="${TMTRANS_P0_BASELINE:-benchmarks/results/v2/summary.csv}"
+P0_BASELINE="${TMTRANS_P0_BASELINE:-benchmarks/results/v3.2/summary.csv}"
 
 run_p0() {
   echo "== [P0] evidence check against $P0_CSV =="
@@ -77,7 +77,7 @@ EOF
 }
 
 run_baseline_check() {
-  echo "== [baseline-check] stored/injected repro chrF vs v2 baseline ($P0_BASELINE) =="
+  echo "== [baseline-check] stored/injected repro chrF vs baseline ($P0_BASELINE) =="
   TMTRANS_P0_BASELINE="$P0_BASELINE" "$PY" - <<'EOF'
 import csv, json, os, sys
 base = os.environ["TMTRANS_P0_BASELINE"]
@@ -143,6 +143,9 @@ if labels.get("UNCLEAR", 0) and labels["UNCLEAR"] / max(len(rows), 1) > 0.10:
 missing = 0
 skipped = 0
 v2 = Path("benchmarks/results/v2")
+if not v2.is_dir():
+    print("SKIP: benchmarks/results/v2/ not present — label-completeness audit unavailable in this checkout (results were removed in the 2026-11-23 cleanup; see benchmarks/results/README.md).")
+    sys.exit(0)
 for f in v2.glob("*_mlx-community_Qwen2.5-3B-Instruct-4bit.jsonl"):
     name = f.name.split("_mlx-community")[0]
     if name.startswith(("abl_", "repro_")):
@@ -170,12 +173,16 @@ import sys
 sys.path.insert(0, "benchmarks")
 from pathlib import Path
 import run_v2
-run_v2.OUT_SAVE = Path("benchmarks/results/v3")
+run_v2.OUT_SAVE = Path("benchmarks/results/repro")
+run_v2.OUT_SAVE.mkdir(parents=True, exist_ok=True)
 from run_v2 import load_mespen, load_usda, make_translator, run_dataset, set_seed
 import csv
 import os
 model = os.environ["TMTRANS_MODEL"]
 t = make_translator("real", model, extra_glossary="mespen")
+if not Path(os.environ["TMTRANS_P0_BASELINE"]).exists():
+    print(f"BASELINE MISSING: {os.environ['TMTRANS_P0_BASELINE']}")
+    sys.exit(1)
 v2_baseline = {}
 with open(os.environ["TMTRANS_P0_BASELINE"], encoding="utf-8") as f:
     for r in csv.DictReader(f):

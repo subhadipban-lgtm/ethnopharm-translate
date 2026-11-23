@@ -43,7 +43,7 @@ echo "== [3/3] zero-tolerance gate check =="
 import csv, sys
 from pathlib import Path
 
-out = Path("benchmarks/results/v2/summary.csv")
+out = Path("benchmarks/results/v3.2/summary.csv")
 if not out.exists():
     print("summary.csv missing"); sys.exit(1)
 adversarial = {"hallucination-check"}
