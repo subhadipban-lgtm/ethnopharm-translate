@@ -1,4 +1,4 @@
-# tmtrans — validated traditional-medicine translation workbench
+# Ethnopharm_translate — validated traditional-medicine translation workbench
 
 Local-server program for translating traditional medicine literature (TCM,
 Ayurveda, and Southeast Asian ethnopharmacology) into English with **proper
@@ -101,7 +101,7 @@ Requires Python 3.10+.
 git clone <this-repo> && cd ethnopharm-translate
 python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-pip install -e .
+pip install -e.
 
 # Point at your model server — Ollama by default:
 export TMTRANS_BASE_URL=http://localhost:11434/v1
