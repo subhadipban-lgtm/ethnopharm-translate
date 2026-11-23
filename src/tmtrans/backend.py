@@ -139,8 +139,17 @@ class NLLBBackend(LLMBackend):
                 "pip install 'tmtrans[nllb]'  (torch + transformers + sentencepiece). "
                 f"Import failed: {exc}"
             ) from exc
+        import torch
         self._tok = AutoTokenizer.from_pretrained(self.cfg.nllb_model)
-        self._model = AutoModelForSeq2SeqLM.from_pretrained(self.cfg.nllb_model)
+        # Prefer GPU; fall back to CPU. NLLB-3.3B in fp32 is ~13GB — fine on a
+        # single L4/A100 but far too slow on CPU.
+        device = "cuda" if torch.cuda.is_available() else "cpu"
+        self._device = device
+        kwargs = {}
+        if device == "cuda":
+            kwargs["torch_dtype"] = torch.float16
+        self._model = AutoModelForSeq2SeqLM.from_pretrained(self.cfg.nllb_model, **kwargs)
+        self._model.to(device)
         self._model.eval()
 
     def _flores(self, lang: str) -> str:
@@ -171,6 +180,7 @@ class NLLBBackend(LLMBackend):
         try:
             import torch
             inputs = self._tok(src_text, return_tensors="pt", truncation=True, max_length=512)
+            inputs = {k: v.to(self._device) for k, v in inputs.items()}
             forced_bos = self._tok.convert_tokens_to_ids(tgt_code)
             with torch.no_grad():
                 gen = self._model.generate(
