@@ -86,6 +86,12 @@ def main():
                 {"role": "user", "content": s},
             ]
             hyp = backend.complete(msgs)
+            if args.backend == "nllb":
+                # NLLB backend returns the tmtrans JSON envelope; unwrap it.
+                try:
+                    hyp = json.loads(hyp).get("translation", "")
+                except Exception:
+                    pass
             preds.append(hyp.strip())
             if (i + 1) % 50 == 0:
                 print(f"  {direction} {i+1}/{len(srcs)} ({time.time()-t0:.0f}s)", flush=True)
