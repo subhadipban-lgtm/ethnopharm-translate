@@ -10,11 +10,43 @@ discovery pipeline.
 
 ## Why not generic MT
 
-Traditional medicine texts defeat generic MT: classical phrasing (文言文,
-classical Sanskrit), formula names, materia medica synonyms, and concepts with
-no biomedical equivalent (qi, dosha, 归经). The failure mode that matters most
-is **hallucinated binomials** — a model inventing a plausible Latin species name
-for a herb it cannot identify. tmtrans is built around preventing exactly that.
+**"Generic MT" means a general-purpose machine translation system** — one
+trained to translate everything to everything, rather than specialised for a
+domain or language pair. Google Translate, DeepL, and Meta's NLLB-200 are
+generic MT: enormous parallel corpora, hundreds of language pairs, fluent
+output on everyday text. The contrast in this repository is with
+*domain-specialised* MT: models tuned for a domain (medical, legal, TCM) or
+constrained at inference time by a glossary, memory, or terminology list.
+
+Traditional medicine texts defeat generic MT on three counts:
+
+1. **Domain vocabulary is thin.** Formula names (桂枝汤), materia medica terms,
+   and concepts with no biomedical equivalent (qi, dosha, 归经) are poorly
+   represented in generic training data. A generic model renders them as
+   something plausible-sounding but wrong, or silently normalises them away.
+2. **The dangerous failure mode is fluent hallucination, not obvious garbage.**
+   A generic model can produce a perfectly grammatical English sentence that
+   invents a Latin binomial for a herb it could not identify — e.g. writing
+   *Glycyrrhiza fakensis* — and nothing in the fluency signals the fabrication.
+   That is precisely what the G5 binomial gate and the accepted-species
+   registry exist to catch.
+3. **Generic models will not obey binding constraints.** You can prompt
+   "use exactly this rendering," but a generic model is only loosely obedient
+   to it. tmtrans treats the glossary as a hard constraint instead, then
+   **verifies** compliance deterministically with gate G3 — rather than
+   trusting the model to follow it.
+
+The failure mode that matters most is **hallucinated binomials**. tmtrans is
+built around preventing exactly that.
+
+**Limit of the claim.** "Not generic MT" does not mean tmtrans is a better
+translator in the abstract. Our own FLORES-200 numbers are 30–40 chrF++ —
+below the published NLLB-200 anchor (~55) and below what a tuned MT system
+achieves. What tmtrans adds is the enforcement layer on top of the model: no
+unattested binomial, no dropped dosage, no glossary violation ships silently,
+no matter which underlying model you use. That layer is only as good as the
+glossary and the human review behind it — and it is not a substitute for
+either.
 
 ## How it works
 
