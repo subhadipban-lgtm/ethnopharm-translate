@@ -24,7 +24,9 @@ def load_pair(src: str, tgt: str):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--backend", default="openai_compat", choices=["openai_compat", "mock"])
+    ap.add_argument("--backend", default="openai_compat", choices=["openai_compat", "mock", "nllb"])
+    ap.add_argument("--src-lang", default=None, help="FLORES src code for nllb, e.g. eng_Latn")
+    ap.add_argument("--tgt-lang", default=None, help="FLORES tgt code; default comes from direction")
     ap.add_argument("--model", required=True)
     ap.add_argument("--directions", default="eng_Latn->tha_Thai,eng_Latn->zho_Hans")
     ap.add_argument("--limit", type=int, default=1012)
@@ -37,6 +39,13 @@ def main():
     if args.backend == "mock":
         from tmtrans.backend import MockBackend
         backend = MockBackend()
+    elif args.backend == "nllb":
+        from tmtrans.backend import BackendConfig, NLLBBackend
+        cfg = BackendConfig.from_env()
+        cfg.nllb_model = args.model
+        cfg.src_lang = args.src_lang or "eng_Latn"
+        cfg.temperature = 0.0
+        backend = NLLBBackend(cfg)
     else:
         from tmtrans.backend import BackendConfig, OpenAICompatBackend
         cfg = BackendConfig.from_env()
@@ -60,6 +69,9 @@ def main():
     }
     for direction in args.directions.split(","):
         src, tgt = direction.split("->")
+        if args.backend == "nllb":
+            backend.cfg.tgt_lang = args.tgt_lang or tgt
+            backend.cfg.src_lang = args.src_lang or src
         srcs, refs = load_pair(src, tgt)
         srcs, refs = srcs[:args.limit], refs[:args.limit]
         tgt_name = LANG.get(tgt, tgt)
