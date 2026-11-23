@@ -28,6 +28,10 @@ dependencies = [
 dev = ["pytest>=8.0"]
 pdf = ["pymupdf>=1.24"]
 ocr = ["surya-ocr>=0.14", "Pillow>=10.0"]
+# Meta NLLB-200 (facebook/nllb-200-3.3B) — CC-BY-NC-4.0, NON-COMMERCIAL use only.
+# Installing this extra does not change the Apache-2.0 license of this package;
+# it means NLLB weights are fetched and used under their own terms.
+nllb = ["torch>=2.1", "transformers>=4.40", "sentencepiece>=0.2", "accelerate>=0.30"]
 
 [project.scripts]
 tmtrans = "tmtrans.cli:main"

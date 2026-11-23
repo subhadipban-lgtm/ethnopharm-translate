@@ -69,3 +69,35 @@ def normalize_form(text: str) -> str:
     whitespace-collapsed. Diacritics matter for Sanskrit IAST matching, so the
     raw form is always kept alongside."""
     return re.sub(r"\s+", " ", _strip_diacritics(text).lower()).strip()
+
+
+# FLORES-200 language codes used by NLLB-200. Mapping from the internal ISO-639
+# codes we use elsewhere to the FLORES-200 script-qualified codes NLLB needs.
+_FLORES_200 = {
+    "zh": "zho_Hans",
+    "lzh": "zho_Hans",   # NLLB has no classical Chinese; simplified modern is closest
+    "sa": "san_Deva",
+    "pi": "pli_Latn",
+    "hi": "hin_Deva",
+    "ta": "tam_Taml",
+    "th": "tha_Thai",
+    "km": "khm_Khmr",
+    "lo": "lao_Laoo",
+    "my": "mya_Mymr",
+    "vi": "vie_Latn",
+    "id": "ind_Latn",
+    "ms": "zsm_Latn",
+    "tl": "tgl_Latn",
+    "en": "eng_Latn",
+}
+
+
+def flores_code(code: str) -> str:
+    """Map an internal language code to the FLORES-200 code NLLB expects."""
+    key = (code or "").lower()
+    if key not in _FLORES_200:
+        raise ValueError(
+            f"No FLORES-200 mapping for source language {code!r}. "
+            f"Supported: {sorted(_FLORES_200)}"
+        )
+    return _FLORES_200[key]

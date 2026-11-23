@@ -44,3 +44,14 @@ files from `https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/main/NTR
 | Use | `benchmarks/run_flores.py` — computes chrF++ / spBLEU / BLEU / TER against eng_Latn source |
 
 No FLORES-200 text is committed. Only derived metrics (chrF++, spBLEU) are reported, in aggregate.
+
+## NLLB-200 model weights (NOT committed — optional backend)
+
+| Item | Value |
+|---|---|
+| Model | `facebook/nllb-200-3.3B` (and -600M / -1.3B / -54B) |
+| License | **CC-BY-NC-4.0 — non-commercial use only** |
+| Fetched | at install/run time from the Hugging Face Hub; never committed |
+| Used by | `tmtrans[nllb]` optional backend (`TMTRANS_BACKEND=nllb`) |
+| Implication | Using the NLLB backend makes that deployment **non-commercial**. The rest of this repository remains Apache-2.0; installing the extra does not relicense the project, but it obliges you to comply with the model licence for anything produced with it. |
+| Citation | NLLB Team, "No Language Left Behind: Scaling Human-Centered Machine Translation", arXiv:2207.04672 |

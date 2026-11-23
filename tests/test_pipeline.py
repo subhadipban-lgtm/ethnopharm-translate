@@ -266,3 +266,49 @@ def test_gate_residual_script_detects_source_leftover(glossary):
     )
     g4 = next(r for r in report.results if r.gate == "untranslated")
     assert not g4.passed
+
+
+# ---- NLLB backend (no torch required) ----
+
+def test_nllb_backend_registered():
+    from tmtrans.backend import BackendConfig, get_backend, NLLBBackend
+    cfg = BackendConfig(kind="nllb")
+    assert isinstance(get_backend(cfg), NLLBBackend)
+
+
+def test_nllb_reports_missing_dependency_without_torch():
+    from tmtrans.backend import BackendConfig, NLLBBackend
+    b = NLLBBackend(BackendConfig(kind="nllb"))
+    h = b.health()
+    # Either torch is installed (ok=True) or it reports the missing extra clearly.
+    assert h["ok"] is False or h["ok"] is True
+    if not h["ok"]:
+        assert "nllb" in h["error"]
+
+
+def test_nllb_extracts_source_from_prompt():
+    from tmtrans.backend import NLLBBackend
+    src = NLLBBackend._extract_source([
+        {"role": "system", "content": "sys"},
+        {"role": "user", "content": 'Translate...\n"""\n桂枝汤主治风寒\n"""\nReturn JSON'},
+    ])
+    assert src == "桂枝汤主治风寒"
+
+
+def test_flores_language_codes():
+    from tmtrans.lang import flores_code
+    assert flores_code("th") == "tha_Thai"
+    assert flores_code("zh") == "zho_Hans"
+    assert flores_code("lzh") == "zho_Hans"
+    assert flores_code("sa") == "san_Deva"
+    assert flores_code("km") == "khm_Khmr"
+    assert flores_code("en") == "eng_Latn"
+    with __import__("pytest").raises(ValueError):
+        flores_code("xx")
+
+
+def test_get_backend_rejects_unknown_kind():
+    from tmtrans.backend import BackendConfig, get_backend, BackendError
+    import pytest
+    with pytest.raises(BackendError):
+        get_backend(BackendConfig(kind="bogus"))

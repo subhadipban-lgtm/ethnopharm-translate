@@ -94,6 +94,37 @@ The mock backend echoes the source with glossary substitutions so you can
 exercise the full pipeline, validation gates, review queue and exports without
 any model. This is also how the test suite runs.
 
+### NLLB-200 backend (optional, non-commercial)
+
+```bash
+pip install -e '.[nllb]'
+export TMTRANS_BACKEND=nllb
+export TMTRANS_NLLB_MODEL=facebook/nllb-200-3.3B
+export TMTRANS_SRC_LANG=zho_Hans      # FLORES-200 code; e.g. san_Deva, tha_Thai, khm_Khmr
+export TMTRANS_TGT_LANG=eng_Latn
+tmtrans serve
+```
+
+NLLB-200 is Meta's dedicated machine-translation model, **not** an instruction
+model. Practical consequences, all deliberate:
+
+- It ignores the system prompt, the glossary block and the JSON output contract,
+  so **binding glossary constraints are not applied** to NLLB output. Terms will
+  frequently diverge from the glossary; G3 will flag them.
+- It takes no direction hint from the prompt; you must set `TMTRANS_SRC_LANG`
+  (a FLORES-200 code) yourself, e.g. `zho_Hans`, `san_Deva`, `tha_Thai`.
+- It emits no term annotations (`terms` is always `[]`).
+- Validation gates (G3, G5, G6, G7) still run unchanged, so you will see which
+  segments fail review rather than getting silent corruption.
+- The classical→modern rewrite stage is not meaningful for NLLB (no
+  instruction-following); leave it off or use modern input.
+
+**Licence:** NLLB-200 weights are **CC-BY-NC-4.0 (non-commercial)**. Installing
+`tmtrans[nllb]` does not change the Apache-2.0 licence of this repository, but
+using the NLLB backend makes that deployment non-commercial. If you ship a
+product, use an OpenAI-compatible open-weight model instead (Qwen2.5, the
+M2M-100 family, Madlad-400) or obtain a commercial licence from Meta.
+
 ### Docker
 
 ```bash
@@ -175,7 +206,7 @@ source .venv/bin/activate        # or call .venv/bin/tmtrans directly
 ### 1. Point it at your model
 
 ```bash
-export TMTRANS_BACKEND=openai_compat
+export TMTRANS_BACKEND=openai_compat   # or: mock | nllb
 export TMTRANS_BASE_URL=http://localhost:11434/v1   # Ollama
 export TMTRANS_MODEL=qwen2.5:7b-instruct
 # vLLM instead:
@@ -366,7 +397,7 @@ src/tmtrans/
   dictionary.py  bilingual terminology store (herbs/formulas/diseases/concepts)
   rag.py         TF-IDF char-ngram translation memory + glossary retrieval
   prompts.py     binding-glossary prompt construction, tolerant JSON parsing
-  backend.py     OpenAI-compatible client (vLLM/Ollama/...) + mock backend
+  backend.py     OpenAI-compatible client (vLLM/Ollama/...) + mock + NLLB-200
   translate.py   orchestration, self-repair retries, classical stage
   validate.py    the seven deterministic gates
   db.py          SQLite: documents, segments, reports, term candidates
@@ -384,7 +415,7 @@ tests/           offline end-to-end suite (mock backend)
 
 ```bash
 export TMTRANS_BACKEND=mock
-pytest            # 43 offline tests (mock backends, no model needed)
+pytest            # 49 offline tests (mock backends, no model needed)
 ```
 
 ## License
