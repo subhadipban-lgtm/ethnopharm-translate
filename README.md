@@ -40,8 +40,11 @@ deterministic validation gates
   G2 non-empty / not a copy of source
   G3 every glossary rendering appears verbatim in the output
   G4 residual source-script detection (untranslated spans)
+        — v3.2 fix: Latin-script sources (en/vi/id/ms/tl) no longer
+          false-fail; a perfect Thai translation of English scored 1.0 before
   G5 binomial hallucination check against glossary + accepted-species registry
-  G6 numbers / dosages preserved
+  G6 numbers / dosages preserved  — FAIL-CLOSED (v3.2): any dropped numeric
+        token blocks auto_pass. 180°→185°-type corruptions cannot ship.
   G7 length-ratio plausibility
       │
       ▼
@@ -312,14 +315,42 @@ binomial, inchikey, family, tradition, pharmacopoeia, notes
   binomials, keeping translation consistent with the discovery chain's
   InChIKey-keyed universe. The `inchikey` column is reserved for this linkage.
 
-## Recommended models (verified against HF, Nov 2026)
+## Measured model performance (Nov 2026)
 
-| Purpose | Recommendation |
-|---|---|
-| General zh/sa→en with RAG | Qwen2.5-7B-Instruct (or larger) via vLLM/Ollama |
-| TCM-specialised decoding | FreedomIntelligence/ShizhenGPT-7B-LLM |
-| Classical Chinese encoding | gujiBERT (for encoding/NER tasks, not generation) |
-| Budget SFT baseline | fine-tuned NLLB-200-distilled-600M |
+FLORES-200 devtest, eng→tha and eng→zho_Hans, chrF++ (sacrebleu, word_order=2),
+1012 segments each, temperature 0, run 2026-11-23. Full write-up:
+`benchmarks/FLORES_COMPARISON.md`. Raw outputs: `benchmarks/results/flores/*.json`.
+FLORES-200 text is not committed (CC-BY-SA-4.0); reproduce with
+`benchmarks/run_flores.py` after `benchmarks/datasets/fetch_flores.sh`.
+
+| Model (quantization) | eng→tha chrF++ | eng→zho_Hans chrF++ | Notes |
+|---|---|---|---|
+| Qwen2.5-7B-Instruct-AWQ | 30.34 | 26.58 | general instruction LLM |
+| ShizhenGPT-7B-LLM (Q4_K_M) | 28.92 | 24.14 | TCM-fine-tuned; ~no gain over Qwen on these dirs |
+| **NLLB-200-3.3B** | **40.49** | 22.43 | dedicated MT; CC-BY-NC-4.0 (non-commercial) |
+| NLLB-200 (published, eng→high-resource) | 54.9 | 54.9 | paper anchor; same setup not reproduced here |
+
+How to read this:
+
+- **No candidate model is adequate for unsupervised translation.** All three
+  measured models sit 24–40 chrF++ — far below NLLB's published high-resource
+  anchor (~54.9). These are quantized 3–7B models with a plain prompt; the
+  gap is expected, not a bug.
+- **NLLB wins Thai (+10 over the 7B LLMs) but loses Chinese (22.4 vs 26.6).**
+  Do not assume "specialised MT beats general LLM" from the Thai number alone.
+- **chrF++ is surface overlap, not safety.** It would not have caught the
+  180°→185° dosage corruption — that is what the G6 gate is for. Model choice
+  does not substitute for the validation gates or human review.
+- **NLLB-200-3.3B is available as an optional backend** (`TMTRANS_BACKEND=nllb`,
+  `pip install 'tmtrans[nllb]'`) but is CC-BY-NC-4.0 — non-commercial. It is a
+  raw seq2seq model: it ignores the system prompt, the glossary block, and the
+  JSON output contract, so binding glossary constraints do NOT apply to its
+  output. Use it only for baseline/benchmark purposes or if your deployment is
+  non-commercial; the OpenAI-compatible path remains the supported one.
+- **ShizhenGPT-7B-LLM showed no measurable gain** over Qwen2.5-7B on these two
+  directions; its TCM fine-tuning did not transfer to FLORES-style encyclopedic
+  Thai/Chinese. Keep it only if the TCM-domain glossary adherence is what you
+  need and you've verified it yourself.
 
 Avoid zero-adoption community MT checkpoints for production. The prompt-level
 glossary constraint does the heavy lifting; the model needs to be good at
@@ -418,8 +449,57 @@ export TMTRANS_BACKEND=mock
 pytest            # 49 offline tests (mock backends, no model needed)
 ```
 
+Note: the 49 tests exercise the gates with the mock backend only; they do not
+validate any model's translation quality. For model-level numbers see
+`benchmarks/FLORES_COMPARISON.md` and `benchmarks/VALIDATION_REPORT_v3_2.md`,
+including two unresolved P0 safety findings (G2 copy rate 42% on usda-dosage,
+G6 numeric corruption class) that human review does not waive.
+
+## Current status and known limitations (Nov 2026)
+
+This project is in **active validation**, not production. Honest state of the
+evidence, so nobody over-claims:
+
+**Measured, same harness, three models on FLORES-200** (1012 segments × 2 dirs):
+
+| Model | eng→tha chrF++ | eng→zho_Hans chrF++ |
+|---|---|---|
+| Qwen2.5-7B-Instruct-AWQ | 30.34 | 26.58 |
+| ShizhenGPT-7B-LLM (Q4_K_M) | 28.92 | 24.14 |
+| NLLB-200-3.3B | 40.49 | 22.43 |
+
+**Validation P0s open:** G2 non-empty/copy gate failed on usda-dosage (42%
+verbatim copies — the gate now decomposes empty vs copy); G6 numeric-token
+corruption class (180°→185°) is now fail-closed but the underlying model still
+produces such errors — they are caught, not prevented.
+
+**G5 (binomial hallucination) precision is poor** (0% NTREX / 40% adversarial,
+single labeller). The gate currently operates as a block-on-detection, not a
+discriminator; treat every G5 fire as "review needed", not "hallucination
+proven".
+
+**OCR layer is engineering-tested only**, not benchmark-validated (no CER/WER
+yet). **Human review is the acceptance step** — `auto_pass` is not approval.
+**Commercial use:** the optional NLLB backend and FLORES-200-derived artifacts
+carry non-commercial licences; the core package does not.
+
+If you are evaluating whether to adopt this: the pipeline is sound, the gates
+catch real failures, and the honest ceiling on unconstrained translation is
+"assist + human review". For anything dosage-bearing, that review is
+mandatory, not optional.
+
 ## License
 
-Apache-2.0. Seed glossary entries are curated from public pharmacopoeial
+Apache-2.0, except where noted:
+
+- `tmtrans[nllb]` optional extra pulls in Meta's NLLB-200 weights
+  (**CC-BY-NC-4.0 — non-commercial use only**). The extra is optional and
+  installing it does **not** relicense this repository, but NLLB inference in
+  your deployment makes that deployment non-commercial. See
+  `benchmarks/datasets/LICENSES_AND_ATTRIBUTION.md`.
+- FLORES-200 (benchmark data) is fetched at runtime, never committed,
+  CC-BY-SA-4.0; attribution in the same file.
+
+Seed glossary entries are curated from public pharmacopoeial
 nomenclature; verify against your regional pharmacopoeia before clinical use.
 **Not for clinical decision-making.**
