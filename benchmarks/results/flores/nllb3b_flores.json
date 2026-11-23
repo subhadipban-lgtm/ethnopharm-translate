@@ -1,0 +1,18 @@
+[
+  {
+    "direction": "eng_Latn->tha_Thai",
+    "n": 1012,
+    "chrf_pp": 40.49,
+    "bleu_13a": 5.44,
+    "ter": 148.62,
+    "model": "facebook/nllb-200-3.3B"
+  },
+  {
+    "direction": "eng_Latn->zho_Hans",
+    "n": 1012,
+    "chrf_pp": 22.43,
+    "bleu_13a": 1.44,
+    "ter": 119.77,
+    "model": "facebook/nllb-200-3.3B"
+  }
+]
