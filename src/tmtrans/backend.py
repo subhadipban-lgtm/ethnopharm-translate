@@ -170,13 +170,13 @@ class NLLBBackend(LLMBackend):
         self._tok.src_lang = src_code
         try:
             import torch
-            inputs = self._tok(src_text, return_tensors="pt", truncation=True, max_length=1024)
+            inputs = self._tok(src_text, return_tensors="pt", truncation=True, max_length=512)
             forced_bos = self._tok.convert_tokens_to_ids(tgt_code)
             with torch.no_grad():
                 gen = self._model.generate(
                     **inputs,
                     forced_bos_token_id=forced_bos,
-                    max_new_tokens=self.cfg.max_tokens,
+                    max_new_tokens=min(self.cfg.max_tokens, 256),
                     num_beams=4,
                 )
             text = self._tok.batch_decode(gen, skip_special_tokens=True)[0].strip()
