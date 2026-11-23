@@ -11,3 +11,6 @@ build/
 *.egg-info/
 .pytest_cache/
 uploads/
+
+# FLORES-200 is fetched at runtime (see fetch_flores.sh); not committed
+benchmarks/datasets/flores200_dataset/

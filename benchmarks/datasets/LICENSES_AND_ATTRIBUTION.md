@@ -33,3 +33,14 @@ files from `https://raw.githubusercontent.com/MicrosoftTranslator/NTREX/main/NTR
   unverifiable; excluded.
 - `deliciosodemente/holistic` (gated) and `xs12345/TCM-Ancient-Modern-Open`
   (parallel content not public): not used.
+## FLORES-200 devtest (NOT committed — fetched at runtime)
+
+| Item | Value |
+|---|---|
+| File | `flores200_dataset/` (devtest/ & dev/, 204 languages each) |
+| Source | `https://dl.fbaipublicfiles.com/nllb/flores200_dataset.tar.gz` (Meta AI, NLLB, arXiv:2207.04672) |
+| License | FLORES-200 is released by Meta for research use; attribution required. Redistribution in this repo is intentionally avoided. |
+| Fetch | `benchmarks/datasets/fetch_flores.sh` |
+| Use | `benchmarks/run_flores.py` — computes chrF++ / spBLEU / BLEU / TER against eng_Latn source |
+
+No FLORES-200 text is committed. Only derived metrics (chrF++, spBLEU) are reported, in aggregate.
